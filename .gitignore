@@ -1,0 +1,13 @@
+# IDE / Editor
+.idea/
+*.iml
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Dependencies & Build
+node_modules/
+build/
+.gradle/

@@ -80,7 +80,6 @@ src/
 │   │
 │   └── booking/                 # Booking form components
 │       ├── BookingForm.tsx      # Form fields, quick dates & time picker modal
-│       ├── VisitorDetailsCard.tsx # Confirmed visit details summary
 │       └── index.ts
 │
 ├── constants/

@@ -42,7 +42,7 @@ export const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
       : property.address;
 
   return (
-    <View style={[styles.card, shadows.card, style]}>
+    <View style={[styles.card, style]}>
       <Image
         source={getPropertyImageSource(property)}
         style={styles.thumbnail}
@@ -55,7 +55,7 @@ export const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
         </Text>
 
         <View style={styles.locationRow}>
-          <Icons.Pin size={13} color={colors.textSecondary} />
+          <Icons.Pin size={14} color="#1A1A1A" />
           <Text style={styles.locationText} numberOfLines={1}>
             {locationText}
           </Text>
@@ -70,45 +70,50 @@ export const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: spacing.md,
+    borderRadius: 22,
+    padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#ECE9E2',
-    marginBottom: spacing.xl,
+    borderColor: '#ECE7DD',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 3,
+    marginBottom: 26,
   },
   thumbnail: {
-    width: 82,
-    height: 82,
-    borderRadius: 16,
+    width: 96,
+    height: 96,
+    borderRadius: 18,
     backgroundColor: colors.surface,
   },
   info: {
     flex: 1,
-    marginLeft: spacing.md,
+    marginLeft: 16,
     justifyContent: 'center',
   },
   title: {
     fontFamily: 'serif',
-    fontSize: 16,
+    fontSize: 19,
     fontWeight: '700',
     color: '#1A1A1A',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
   locationText: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    marginLeft: 4,
+    fontSize: 13.5,
+    color: '#6B7280',
+    marginLeft: 6,
   },
   price: {
     fontFamily: 'serif',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1A1A1A',
   },

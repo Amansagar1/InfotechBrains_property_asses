@@ -5,14 +5,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from 'react-native';
 import { BookingFormData, BookingFormErrors } from '../../types/booking';
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { borderRadius, spacing } from '../../theme/spacing';
-import { COUNTRY_CODES, TIME_SLOTS } from '../../constants/config';
 import { FormField } from '../common/FormField';
-import { CustomButton } from '../common/CustomButton';
 import { Icons } from '../common/Icons';
 
 export interface BookingFormProps {
@@ -24,6 +21,32 @@ export interface BookingFormProps {
   onSubmit: () => void;
 }
 
+const QUICK_DATES = [
+  { label: 'Today', offset: 0 },
+  { label: 'Tomorrow', offset: 1 },
+  { label: 'In 2 Days', offset: 2 },
+  { label: 'This Weekend', offset: 3 },
+  { label: 'Next Monday', offset: 4 },
+  { label: 'Next Week', offset: 7 },
+];
+
+const TIME_SLOT_OPTIONS = [
+  '10:00 AM - 11:00 AM',
+  '11:30 AM - 12:30 PM',
+  '02:00 PM - 03:00 PM',
+  '04:00 PM - 05:00 PM',
+  '05:30 PM - 06:30 PM',
+];
+
+const COUNTRY_OPTIONS = [
+  { code: '+91', country: 'India', flag: '🇮🇳' },
+  { code: '+1', country: 'United States', flag: '🇺🇸' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
+  { code: '+971', country: 'UAE', flag: '🇦🇪' },
+  { code: '+65', country: 'Singapore', flag: '🇸🇬' },
+  { code: '+61', country: 'Australia', flag: '🇦🇺' },
+];
+
 export const BookingForm: React.FC<BookingFormProps> = ({
   formData,
   errors,
@@ -32,16 +55,16 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   onUpdateField,
   onSubmit,
 }) => {
+  const [showDateModal, setShowDateModal] = useState<boolean>(false);
   const [showTimeModal, setShowTimeModal] = useState<boolean>(false);
   const [showCountryModal, setShowCountryModal] = useState<boolean>(false);
 
-  const setQuickDate = (daysAhead: number) => {
+  const formatDateSelection = (offsetDays: number) => {
     const d = new Date();
-    d.setDate(d.getDate() + daysAhead);
-    const yyyy = d.getFullYear();
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    onUpdateField('preferredDate', `${yyyy}-${mm}-${dd}`);
+    d.setDate(d.getDate() + offsetDays);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const formatted = `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    return formatted;
   };
 
   return (
@@ -58,7 +81,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         value={formData.visitorName}
         onChangeText={text => onUpdateField('visitorName', text)}
         error={errors.visitorName}
-        leftIcon={<Icons.User size={18} color={colors.textSecondary} />}
+        leftIcon={<Icons.User size={20} color="#1A1A1A" />}
         autoCapitalize="words"
       />
 
@@ -69,7 +92,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         value={formData.email}
         onChangeText={text => onUpdateField('email', text)}
         error={errors.email}
-        leftIcon={<Icons.Mail size={18} color={colors.textSecondary} />}
+        leftIcon={<Icons.Mail size={20} color="#1A1A1A" />}
         keyboardType="email-address"
         autoCapitalize="none"
       />
@@ -82,8 +105,8 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         onChangeText={text => onUpdateField('contactNumber', text)}
         error={errors.contactNumber}
         keyboardType="phone-pad"
-        leftIcon={<Icons.Phone size={18} color={colors.textSecondary} />}
-        prefixText={formData.countryCode}
+        leftIcon={<Icons.Phone size={20} color="#1A1A1A" />}
+        prefixText={formData.countryCode || '+91'}
         prefixOnPress={() => setShowCountryModal(true)}
       />
 
@@ -92,10 +115,10 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         required
         placeholder="Select a date"
         value={formData.preferredDate}
-        onChangeText={text => onUpdateField('preferredDate', text)}
         error={errors.preferredDate}
-        leftIcon={<Icons.Calendar size={18} color={colors.textSecondary} />}
-        rightIcon={<Icons.Calendar size={18} color={colors.textSecondary} />}
+        leftIcon={<Icons.Calendar size={20} color="#1A1A1A" />}
+        rightIcon={<Icons.Calendar size={20} color="#1A1A1A" />}
+        onPress={() => setShowDateModal(true)}
       />
 
       <FormField
@@ -104,32 +127,73 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         placeholder="Select a time slot"
         value={formData.preferredTimeSlot}
         error={errors.preferredTimeSlot}
-        leftIcon={<Icons.Clock size={18} color={colors.textSecondary} />}
-        rightIcon={<Icons.ChevronDown size={18} color={colors.textSecondary} />}
+        leftIcon={<Icons.Clock size={20} color="#1A1A1A" />}
+        rightIcon={<Icons.ChevronDown size={18} color="#1A1A1A" />}
         onPress={() => setShowTimeModal(true)}
       />
 
-      {submitError && (
+      {submitError ? (
         <View style={styles.errorBanner}>
           <Text style={styles.errorBannerText}>{submitError}</Text>
         </View>
-      )}
+      ) : null}
 
-      <CustomButton
-        title={isSubmitting ? 'Scheduling Visit...' : 'Submit Request'}
-        onPress={onSubmit}
-        variant="primary"
-        loading={isSubmitting}
+      <TouchableOpacity
+        activeOpacity={0.88}
         disabled={isSubmitting}
-        showArrow={!isSubmitting}
-        style={styles.submitButton}
-      />
+        onPress={onSubmit}
+        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
+      >
+        <Text style={styles.submitButtonText}>
+          {isSubmitting ? 'Scheduling Visit...' : 'Submit Request'}
+        </Text>
+        {!isSubmitting && <Icons.ArrowRight size={18} color="#FFFFFF" />}
+      </TouchableOpacity>
 
       <View style={styles.trustBadge}>
-        <Icons.Lock size={14} color={colors.textSecondary} />
+        <Icons.Lock size={14} color="#6B7280" />
         <Text style={styles.trustText}>Your information is safe with us.</Text>
       </View>
 
+      {/* Date Selection Modal */}
+      <Modal
+        visible={showDateModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDateModal(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setShowDateModal(false)}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Preferred Date</Text>
+            {QUICK_DATES.map(item => {
+              const dateStr = formatDateSelection(item.offset);
+              const isSelected = formData.preferredDate === dateStr;
+              return (
+                <TouchableOpacity
+                  key={item.label}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    onUpdateField('preferredDate', dateStr);
+                    setShowDateModal(false);
+                  }}
+                  style={[styles.modalItem, isSelected && styles.modalItemActive]}
+                >
+                  <Text style={[styles.modalItemText, isSelected && styles.modalItemTextActive]}>
+                    {item.label}
+                  </Text>
+                  <Text style={styles.modalItemSubtext}>{dateStr}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Time Slot Selection Modal */}
       <Modal
         visible={showTimeModal}
         transparent
@@ -143,33 +207,30 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Preferred Time Slot</Text>
-            {TIME_SLOTS.map(slot => (
-              <TouchableOpacity
-                key={slot}
-                activeOpacity={0.7}
-                onPress={() => {
-                  onUpdateField('preferredTimeSlot', slot);
-                  setShowTimeModal(false);
-                }}
-                style={[
-                  styles.slotItem,
-                  formData.preferredTimeSlot === slot && styles.slotItemActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.slotText,
-                    formData.preferredTimeSlot === slot && styles.slotTextActive,
-                  ]}
+            {TIME_SLOT_OPTIONS.map(slot => {
+              const isSelected = formData.preferredTimeSlot === slot;
+              return (
+                <TouchableOpacity
+                  key={slot}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    onUpdateField('preferredTimeSlot', slot);
+                    setShowTimeModal(false);
+                  }}
+                  style={[styles.modalItem, isSelected && styles.modalItemActive]}
                 >
-                  {slot}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text style={[styles.modalItemText, isSelected && styles.modalItemTextActive]}>
+                    {slot}
+                  </Text>
+                  {isSelected && <Icons.Checkmark size={18} color="#264E36" />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </TouchableOpacity>
       </Modal>
 
+      {/* Country Code Modal */}
       <Modal
         visible={showCountryModal}
         transparent
@@ -183,29 +244,25 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Country Code</Text>
-            {COUNTRY_CODES.map(item => (
-              <TouchableOpacity
-                key={item.value}
-                activeOpacity={0.7}
-                onPress={() => {
-                  onUpdateField('countryCode', item.value);
-                  setShowCountryModal(false);
-                }}
-                style={[
-                  styles.slotItem,
-                  formData.countryCode === item.value && styles.slotItemActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.slotText,
-                    formData.countryCode === item.value && styles.slotTextActive,
-                  ]}
+            {COUNTRY_OPTIONS.map(item => {
+              const isSelected = formData.countryCode === item.code;
+              return (
+                <TouchableOpacity
+                  key={item.code}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    onUpdateField('countryCode', item.code);
+                    setShowCountryModal(false);
+                  }}
+                  style={[styles.modalItem, isSelected && styles.modalItemActive]}
                 >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Text style={[styles.modalItemText, isSelected && styles.modalItemTextActive]}>
+                    {item.flag}  {item.country} ({item.code})
+                  </Text>
+                  {isSelected && <Icons.Checkmark size={18} color="#264E36" />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </TouchableOpacity>
       </Modal>
@@ -215,109 +272,121 @@ export const BookingForm: React.FC<BookingFormProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.xxl,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
+    backgroundColor: 'transparent',
+    paddingHorizontal: 0,
+    marginTop: 0,
   },
   sectionTitle: {
     fontFamily: 'serif',
     fontSize: 24,
     fontWeight: '700',
     color: '#1A1A1A',
-    marginBottom: spacing.xxs,
+    marginBottom: 6,
   },
   sectionSubtitle: {
-    ...typography.subtitle,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-  },
-  quickDateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: -spacing.sm,
-    marginBottom: spacing.lg,
-    flexWrap: 'wrap',
-  },
-  quickDateLabel: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    marginRight: spacing.sm,
-  },
-  quickChip: {
-    backgroundColor: colors.surface,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xxs,
-    borderRadius: borderRadius.round,
-    marginRight: spacing.xs,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  },
-  quickChipText: {
-    ...typography.bodySmall,
-    fontSize: 11,
-    color: colors.textPrimary,
+    fontSize: 14,
+    color: '#6B7280',
+    marginBottom: 24,
+    lineHeight: 20,
   },
   errorBanner: {
-    backgroundColor: colors.error,
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.lg,
+    backgroundColor: '#FDE8E8',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#F8B4B4',
   },
   errorBannerText: {
-    ...typography.bodySmall,
-    color: colors.errorText,
+    fontSize: 13,
+    color: '#9B1C1C',
     textAlign: 'center',
   },
   submitButton: {
-    marginTop: spacing.sm,
-    marginBottom: spacing.lg,
+    backgroundColor: '#264E36',
+    height: 56,
+    borderRadius: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+    marginBottom: 18,
+    shadowColor: '#264E36',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginRight: 10,
   },
   trustBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 36,
   },
   trustText: {
-    ...typography.bodySmall,
-    color: colors.textSecondary,
-    marginLeft: spacing.xs,
+    fontSize: 13,
+    color: '#6B7280',
+    marginLeft: 8,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing.xl,
+    padding: 24,
   },
   modalContent: {
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.xl,
-    padding: spacing.xl,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
     width: '100%',
     maxWidth: 360,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   modalTitle: {
-    ...typography.h3,
-    color: colors.textPrimary,
-    marginBottom: spacing.lg,
+    fontFamily: 'serif',
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 16,
   },
-  slotItem: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderRadius: borderRadius.md,
-    marginBottom: spacing.xs,
+  modalItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 4,
   },
-  slotItemActive: {
-    backgroundColor: colors.surface,
+  modalItemActive: {
+    backgroundColor: '#F3EFE6',
   },
-  slotText: {
-    ...typography.body,
-    color: colors.textPrimary,
+  modalItemText: {
+    fontSize: 14.5,
+    color: '#1A1A1A',
+    fontWeight: '500',
   },
-  slotTextActive: {
-    color: colors.primary,
-    fontWeight: '600',
+  modalItemTextActive: {
+    color: '#264E36',
+    fontWeight: '700',
+  },
+  modalItemSubtext: {
+    fontSize: 13,
+    color: '#8A867E',
   },
 });
+

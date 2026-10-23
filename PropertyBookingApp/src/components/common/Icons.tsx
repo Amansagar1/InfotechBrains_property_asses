@@ -276,4 +276,11 @@ export const Icons = {
       <Circle cx="12" cy="12" r="2" stroke={color} strokeWidth="1.8" />
     </Svg>
   ),
+
+  Info: ({ size = 18, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="1.8" />
+      <Path d="M12 16V12M12 8H12.01" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  ),
 };

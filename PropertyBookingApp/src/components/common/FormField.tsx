@@ -9,8 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { borderRadius, spacing } from '../../theme/spacing';
+import { Icons } from './Icons';
 
 export interface FormFieldProps extends TextInputProps {
   label: string;
@@ -42,9 +41,12 @@ export const FormField: React.FC<FormFieldProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <Text style={styles.label}>
-        {label} {required && <Text style={styles.requiredStar}>*</Text>}
-      </Text>
+      {/* Floating Outline Label Badge */}
+      <View style={styles.floatingLabelBadge} pointerEvents="none">
+        <Text style={styles.label}>
+          {label} {required && <Text style={styles.requiredStar}>*</Text>}
+        </Text>
+      </View>
 
       <InputWrapper
         activeOpacity={0.7}
@@ -63,12 +65,14 @@ export const FormField: React.FC<FormFieldProps> = ({
             onPress={prefixOnPress}
             style={styles.prefixContainer}
           >
-            <Text style={styles.prefixText}>{prefixText} ▾</Text>
+            <Text style={styles.prefixText}>{prefixText}</Text>
+            <Icons.ChevronDown size={12} color="#1A1A1A" />
+            <View style={styles.prefixDivider} />
           </TouchableOpacity>
         )}
 
         <TextInput
-          placeholderTextColor={colors.textTertiary}
+          placeholderTextColor="#A5A199"
           editable={!isFieldPressable}
           style={[styles.input, style]}
           pointerEvents={isFieldPressable ? 'none' : 'auto'}
@@ -85,57 +89,79 @@ export const FormField: React.FC<FormFieldProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: spacing.lg,
+    marginBottom: 20,
+    position: 'relative',
+  },
+  floatingLabelBadge: {
+    position: 'absolute',
+    top: -9,
+    left: 50,
+    zIndex: 10,
+    backgroundColor: '#F9F4EB',
+    paddingHorizontal: 6,
   },
   label: {
-    ...typography.badge,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#6E6B65',
+    letterSpacing: 0.2,
   },
   requiredStar: {
-    color: colors.errorText,
+    color: '#C4704F',
+    fontWeight: '700',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
-    borderRadius: borderRadius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    minHeight: 52,
-    paddingHorizontal: spacing.md,
+    backgroundColor: 'transparent',
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: '#E6E0D4',
+    height: 56,
+    paddingHorizontal: 16,
   },
   inputError: {
     borderColor: colors.errorText,
     backgroundColor: '#FFF8F8',
   },
   leftIconContainer: {
-    marginRight: spacing.sm,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rightIconContainer: {
-    marginLeft: spacing.sm,
+    marginLeft: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   prefixContainer: {
-    paddingRight: spacing.sm,
-    marginRight: spacing.sm,
-    borderRightWidth: 1,
-    borderRightColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 8,
   },
   prefixText: {
-    ...typography.body,
+    fontSize: 14.5,
     fontWeight: '600',
-    color: colors.textPrimary,
+    color: '#1A1A1A',
+    marginRight: 5,
+  },
+  prefixDivider: {
+    width: 1.2,
+    height: 22,
+    backgroundColor: '#E6E0D4',
+    marginLeft: 8,
+    marginRight: 8,
   },
   input: {
     flex: 1,
-    ...typography.body,
-    color: colors.textPrimary,
-    paddingVertical: spacing.sm,
+    fontSize: 14.5,
+    color: '#1A1A1A',
+    paddingVertical: 0,
   },
   errorText: {
-    ...typography.bodySmall,
+    fontSize: 12,
     color: colors.errorText,
-    marginTop: spacing.xxs,
+    marginTop: 4,
+    marginLeft: 12,
   },
 });

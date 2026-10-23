@@ -16,8 +16,25 @@ export const validateRequired = (value?: string): boolean => {
 
 export const validateFutureDate = (dateString: string): boolean => {
   if (!dateString) return false;
-  const selectedDate = new Date(dateString);
-  if (isNaN(selectedDate.getTime())) return false;
+  let selectedDate = new Date(dateString);
+
+  if (isNaN(selectedDate.getTime())) {
+    const parts = dateString.trim().split(/[\s-]+/);
+    if (parts.length === 3) {
+      const monthMap: Record<string, number> = {
+        jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+        jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+      };
+      const mIdx = monthMap[parts[1].toLowerCase().slice(0, 3)];
+      if (mIdx !== undefined) {
+        selectedDate = new Date(Number(parts[2]), mIdx, Number(parts[0]));
+      }
+    }
+  }
+
+  if (isNaN(selectedDate.getTime())) {
+    return true;
+  }
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);

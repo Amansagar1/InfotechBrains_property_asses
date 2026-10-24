@@ -1,9 +1,16 @@
 import { APP_CONFIG } from '../constants/config';
 import { Photo } from '../types/property';
 
+export const SAVED_IMAGES = {
+  maplewood: require('../assets/images/saved_maplewood.jpg'),
+  serene: require('../assets/images/saved_serene.jpg'),
+  willow: require('../assets/images/saved_willow.jpg'),
+};
+
 export const CURATED_PROPERTY_IMAGES = [
-  require('../assets/images/maplewood_villa.jpg'),
-  require('../assets/images/serene_heights.jpg'),
+  SAVED_IMAGES.maplewood,
+  SAVED_IMAGES.serene,
+  SAVED_IMAGES.willow,
   { uri: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop' },
   { uri: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop' },
   { uri: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=1200&auto=format&fit=crop' },
@@ -13,6 +20,7 @@ export const CURATED_PROPERTY_IMAGES = [
   { uri: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop' },
   { uri: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop' },
 ];
+
 
 const GALLERY_FALLBACK_URLS = [
   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop',

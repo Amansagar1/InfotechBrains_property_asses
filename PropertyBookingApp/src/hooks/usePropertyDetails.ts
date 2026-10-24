@@ -30,7 +30,7 @@ export const usePropertyDetails = (propertyId: string, initialProperty?: Propert
         } else if (fetchedProperty.photos && fetchedProperty.photos.length > 0) {
           setPhotos(fetchedProperty.photos);
         }
-      } else {
+      } else if (!initialProperty) {
         throw detailsData.reason;
       }
     } catch (err) {

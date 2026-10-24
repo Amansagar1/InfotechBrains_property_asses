@@ -8,10 +8,12 @@ import {
   StyleSheet,
   RefreshControl,
   Image,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePropertyListings } from '../../hooks/usePropertyListings';
 import { PropertyCard } from '../../components/property/PropertyCard';
+import { PropertyCardSkeleton } from '../../components/property/PropertyCardSkeleton';
 import { LoadingIndicator } from '../../components/common/LoadingIndicator';
 import { ErrorState } from '../../components/common/ErrorState';
 import { Icons } from '../../components/common/Icons';
@@ -146,8 +148,31 @@ export const PropertyListingScreen: React.FC<PropertyListingScreenProps> = ({
     );
   };
 
+  const isInitialLoading = loading && listings.length === 0;
+
+  const skeletonItems = useMemo(
+    () => [
+      { id: 'skeleton_1', isSkeleton: true },
+      { id: 'skeleton_2', isSkeleton: true },
+    ],
+    []
+  );
+
+  const displayListings = isInitialLoading
+    ? (skeletonItems as unknown as Property[])
+    : filteredListings;
+
   const renderEmpty = () => {
-    if (loading) return null;
+    if (isInitialLoading) return null;
+    if (error && listings.length === 0) {
+      return (
+        <ErrorState
+          title="Network Connection Issue"
+          message={error}
+          onRetry={retry}
+        />
+      );
+    }
     return (
       <View style={styles.emptyContainer}>
         <Text style={styles.emptyTitle}>No Properties Found</Text>
@@ -158,28 +183,6 @@ export const PropertyListingScreen: React.FC<PropertyListingScreenProps> = ({
     );
   };
 
-  if (loading && !refreshing && listings.length === 0) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        {renderHeader()}
-        <LoadingIndicator fullScreen message="Fetching curated properties..." />
-      </SafeAreaView>
-    );
-  }
-
-  if (error && listings.length === 0) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        {renderHeader()}
-        <ErrorState
-          title="Network Connection Issue"
-          message={error}
-          onRetry={retry}
-        />
-      </SafeAreaView>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.safeArea}>
       <Image
@@ -188,14 +191,19 @@ export const PropertyListingScreen: React.FC<PropertyListingScreenProps> = ({
         resizeMode="contain"
       />
       <FlatList
-        data={filteredListings}
+        data={displayListings}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <PropertyCard
-            property={item}
-            onPress={() => handlePropertyPress(item)}
-          />
-        )}
+        renderItem={({ item }: { item: any }) => {
+          if (item.isSkeleton) {
+            return <PropertyCardSkeleton />;
+          }
+          return (
+            <PropertyCard
+              property={item}
+              onPress={() => handlePropertyPress(item)}
+            />
+          );
+        }}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         ListEmptyComponent={renderEmpty}
@@ -235,7 +243,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
   },
   headerContainer: {
-    paddingTop: spacing.md,
+    paddingTop: Platform.OS === 'android' ? 14 : spacing.md,
     paddingBottom: spacing.md,
   },
   topRow: {

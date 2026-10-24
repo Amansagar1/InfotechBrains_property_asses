@@ -8,6 +8,7 @@ export type BottomTabParamList = {
   Discover: undefined;
   Saved: undefined;
   Visits: undefined;
+  Messages: undefined;
   Profile: undefined;
 };
 
@@ -39,3 +40,25 @@ export type DiscoverScreenProps = CompositeScreenProps<
   BottomTabScreenProps<BottomTabParamList, 'Discover'>,
   NativeStackScreenProps<RootStackParamList>
 >;
+
+export type SavedScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<BottomTabParamList, 'Saved'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type VisitsScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<BottomTabParamList, 'Visits'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type MessagesScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<BottomTabParamList, 'Messages'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type ProfileScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<BottomTabParamList, 'Profile'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+

@@ -222,6 +222,18 @@ export const Icons = {
     </Svg>
   ),
 
+  ChevronRight: ({ size = 18, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M9 18L15 12L9 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  ),
+
+  Send: ({ size = 18, color = colors.textLight }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  ),
+
   Chat: ({ size = 20, color = colors.textPrimary }: IconProps) => (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path
@@ -283,4 +295,156 @@ export const Icons = {
       <Path d="M12 16V12M12 8H12.01" stroke={color} strokeWidth="2" strokeLinecap="round" />
     </Svg>
   ),
+
+  Bookmark: ({ size = 20, color = colors.textPrimary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M19 21L12 16.5L5 21V5C5 3.89543 5.89543 3 7 3H17C18.1046 3 19 3.89543 19 5V21Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  ExpandSquare: ({ size = 16, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M15 3H21V9M21 3L10 14M10 5H5C3.89543 5 3 5.89543 3 7V19C3 20.1046 3.89543 21 5 21H17C18.1046 21 19 20.1046 19 19V14"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  CalendarCheck: ({ size = 20, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect
+        x="3"
+        y="4"
+        width="18"
+        height="18"
+        rx="2.5"
+        stroke={color}
+        strokeWidth="1.8"
+      />
+      <Path d="M16 2V6M8 2V6M3 9.5H21" stroke={color} strokeWidth="1.8" strokeLinecap="round" />
+      <Path
+        d="M9 15L11 17L15 13"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  MessageDots: ({ size = 20, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M21 11.5C21 16.1944 16.9706 20 12 20C10.4286 20 8.94827 19.6179 7.66667 18.946L3 20L4.2 16.4C3.44762 15.011 3 13.342 3 11.5C3 6.80558 7.02944 3 12 3C16.9706 3 21 6.80558 21 11.5Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Circle cx="8.5" cy="11.5" r="1.2" fill={color} />
+      <Circle cx="12" cy="11.5" r="1.2" fill={color} />
+      <Circle cx="15.5" cy="11.5" r="1.2" fill={color} />
+    </Svg>
+  ),
+
+  MoreVertical: ({ size = 18, color = colors.textPrimary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="5" r="1.8" fill={color} />
+      <Circle cx="12" cy="12" r="1.8" fill={color} />
+      <Circle cx="12" cy="19" r="1.8" fill={color} />
+    </Svg>
+  ),
+
+  Bell: ({ size = 20, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M18 8A6 6 0 0 0 6 8C6 15 3 17 3 17H21S18 15 18 8Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M13.73 21A2 2 0 0 1 10.27 21"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  Settings: ({ size = 20, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="3" stroke={color} strokeWidth="1.8" />
+      <Path
+        d="M19.4 15A1.65 1.65 0 0 0 19.73 16.82L19.86 16.95A2 2 0 1 1 17 19.83L16.87 19.7A1.65 1.65 0 0 0 15.05 19.37A1.65 1.65 0 0 0 14 20.9V21A2 2 0 1 1 10 21V20.89A1.65 1.65 0 0 0 8.95 19.37A1.65 1.65 0 0 0 7.13 19.7L7 19.83A2 2 0 1 1 4.14 17L4.27 16.87A1.65 1.65 0 0 0 4.6 15.05A1.65 1.65 0 0 0 3.1 14H3A2 2 0 1 1 3 10H3.11A1.65 1.65 0 0 0 4.63 8.95A1.65 1.65 0 0 0 4.3 7.13L4.17 7A2 2 0 1 1 7 4.14L7.13 4.27A1.65 1.65 0 0 0 8.95 4.6A1.65 1.65 0 0 0 10 3.1V3A2 2 0 1 1 14 3V3.11A1.65 1.65 0 0 0 15.05 4.63A1.65 1.65 0 0 0 16.87 4.3L17 4.17A2 2 0 1 1 19.83 7L19.7 7.13A1.65 1.65 0 0 0 19.37 8.95A1.65 1.65 0 0 0 20.9 10H21A2 2 0 1 1 21 14H20.89A1.65 1.65 0 0 0 19.4 15Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  LogOut: ({ size = 20, color = '#DC2626' }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M16 17L21 12L16 7"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <Path
+        d="M21 12H9"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  Pencil: ({ size = 14, color = '#FFFFFF' }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M17 3A2.82843 2.82843 0 1 1 21 7L7.5 20.5L2 22L3.5 16.5L17 3Z"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
+
+  Shield: ({ size = 20, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 22C12 22 20 18 20 12V5L12 2L4 5V12C4 18 12 22 12 22Z"
+        stroke={color}
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  ),
 };
+

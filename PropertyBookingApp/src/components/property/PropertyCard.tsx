@@ -40,6 +40,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? 'Maplewood Villa'
       : property.id === 'prop_002'
       ? 'Serene Heights'
+      : property.id === 'prop_003'
+      ? 'Willow Creek Residence'
       : property.address.split(',')[0] || 'Modern Residence';
 
   const displayPrice =
@@ -47,6 +49,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? '₹ 2.4 Cr'
       : property.id === 'prop_002'
       ? '₹ 1.35 Cr'
+      : property.id === 'prop_003'
+      ? '₹ 85 Lakh'
       : formatPrice(property.price, property.currency);
 
   const displayLocation =
@@ -54,6 +58,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? 'Whitefield, Bangalore'
       : property.id === 'prop_002'
       ? 'Sarjapur Road, Bangalore'
+      : property.id === 'prop_003'
+      ? 'Hennur Main Road, Bangalore'
       : property.city && property.state
       ? `${property.city}, ${property.state}`
       : property.address;
@@ -63,6 +69,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? 'Villa'
       : property.id === 'prop_002'
       ? 'Apartment'
+      : property.id === 'prop_003'
+      ? 'Independent House'
       : formatPropertyType(property.property_type);
 
   const displayBeds =
@@ -70,12 +78,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? '4 Beds'
       : property.id === 'prop_002'
       ? '3 Beds'
+      : property.id === 'prop_003'
+      ? '2 Beds'
       : formatBeds(property.beds);
 
   const displayBaths =
     property.id === 'prop_001'
       ? '3 Baths'
       : property.id === 'prop_002'
+      ? '2 Baths'
+      : property.id === 'prop_003'
       ? '2 Baths'
       : formatBaths(property.baths);
 
@@ -84,6 +96,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       ? '2,400 sqft'
       : property.id === 'prop_002'
       ? '1,600 sqft'
+      : property.id === 'prop_003'
+      ? '1,250 sqft'
       : formatSqft(property.sqft);
 
   return (

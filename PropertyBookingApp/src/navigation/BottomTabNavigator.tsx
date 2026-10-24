@@ -3,6 +3,10 @@ import { View, Text, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabParamList } from '../types/navigation';
 import { PropertyListingScreen } from '../screens/listing/PropertyListingScreen';
+import { SavedPropertiesScreen } from '../screens/saved/SavedPropertiesScreen';
+import { VisitsScreen } from '../screens/visits/VisitsScreen';
+import { MessagesScreen } from '../screens/messages/MessagesScreen';
+import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { Icons } from '../components/common/Icons';
 import { colors } from '../theme/colors';
 import { typography } from '../theme/typography';
@@ -22,12 +26,17 @@ const PlaceholderScreen = ({ title }: { title: string }) => (
 export const BottomTabNavigator: React.FC = () => {
   return (
     <Tab.Navigator
+      initialRouteName="Discover"
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarItemStyle: styles.tabBarItem,
+        tabBarIconStyle: styles.tabBarIcon,
         tabBarLabelStyle: styles.tabLabel,
+        tabBarActiveTintColor: '#0F4A3E',
+        tabBarInactiveTintColor: '#6B7280',
+        tabBarActiveBackgroundColor: 'transparent',
+        tabBarInactiveBackgroundColor: 'transparent',
       }}
     >
       <Tab.Screen
@@ -35,48 +44,88 @@ export const BottomTabNavigator: React.FC = () => {
         component={PropertyListingScreen}
         options={{
           tabBarLabel: 'Discover',
-          tabBarIcon: ({ focused }) => (
+          tabBarIcon: ({ focused }) =>
             focused ? (
               <View style={styles.activeIconCircle}>
-                <Icons.Home size={18} color="#FFFFFF" />
+                <Icons.Home size={17} color="#FFFFFF" />
               </View>
             ) : (
-              <Icons.Home size={20} color={colors.textSecondary} />
-            )
-          ),
+              <View style={styles.inactiveIconWrapper}>
+                <Icons.Home size={20} color="#6B7280" />
+              </View>
+            ),
         }}
       />
 
       <Tab.Screen
         name="Saved"
-        children={() => <PlaceholderScreen title="Saved Properties" />}
+        component={SavedPropertiesScreen}
         options={{
           tabBarLabel: 'Saved',
-          tabBarIcon: ({ color, focused }) => (
-            <Icons.Heart size={20} color={color} filled={focused} />
-          ),
+          tabBarIcon: ({ focused }) =>
+            focused ? (
+              <View style={styles.activeIconCircle}>
+                <Icons.Heart size={16} color="#FFFFFF" filled={true} />
+              </View>
+            ) : (
+              <View style={styles.inactiveIconWrapper}>
+                <Icons.Heart size={20} color="#6B7280" filled={false} />
+              </View>
+            ),
         }}
       />
 
       <Tab.Screen
         name="Visits"
-        children={() => <PlaceholderScreen title="Scheduled Visits" />}
+        component={VisitsScreen}
         options={{
           tabBarLabel: 'Visits',
-          tabBarIcon: ({ color }) => (
-            <Icons.Calendar size={20} color={color} />
-          ),
+          tabBarIcon: ({ focused }) =>
+            focused ? (
+              <View style={styles.activeIconCircle}>
+                <Icons.CalendarCheck size={17} color="#FFFFFF" />
+              </View>
+            ) : (
+              <View style={styles.inactiveIconWrapper}>
+                <Icons.CalendarCheck size={19} color="#6B7280" />
+              </View>
+            ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Messages"
+        component={MessagesScreen}
+        options={{
+          tabBarLabel: 'Messages',
+          tabBarIcon: ({ focused }) =>
+            focused ? (
+              <View style={styles.activeIconCircle}>
+                <Icons.MessageDots size={17} color="#FFFFFF" />
+              </View>
+            ) : (
+              <View style={styles.inactiveIconWrapper}>
+                <Icons.MessageDots size={19} color="#6B7280" />
+              </View>
+            ),
         }}
       />
 
       <Tab.Screen
         name="Profile"
-        children={() => <PlaceholderScreen title="User Profile" />}
+        component={ProfileScreen}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ color }) => (
-            <Icons.User size={20} color={color} />
-          ),
+          tabBarIcon: ({ focused }) =>
+            focused ? (
+              <View style={styles.activeIconCircle}>
+                <Icons.User size={17} color="#FFFFFF" />
+              </View>
+            ) : (
+              <View style={styles.inactiveIconWrapper}>
+                <Icons.User size={20} color="#6B7280" />
+              </View>
+            ),
         }}
       />
     </Tab.Navigator>
@@ -85,30 +134,56 @@ export const BottomTabNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    backgroundColor: colors.card,
+    backgroundColor: '#FFFFFF',
     borderTopWidth: 1,
-    borderTopColor: colors.borderSubtle,
-    height: 64,
-    paddingBottom: spacing.sm,
-    paddingTop: spacing.xs,
+    borderTopColor: '#ECEAE4',
+    height: 72,
+    paddingTop: 6,
+    paddingBottom: 6,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
   },
-  activeIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.primary,
+  tabBarItem: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 2,
+  },
+  tabBarIcon: {
+    width: 34,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: -4,
+    marginBottom: 0,
+  },
+  activeIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#0F4A3E',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  inactiveIconWrapper: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tabLabel: {
-    ...typography.badge,
-    fontSize: 11,
+    fontSize: 12.5,
     fontWeight: '500',
+    marginTop: 3,
+    marginBottom: 0,
+    paddingTop: 0,
+    lineHeight: 16,
   },
   placeholderContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#FAF8F5',
     justifyContent: 'center',
     alignItems: 'center',
     padding: spacing.xl,

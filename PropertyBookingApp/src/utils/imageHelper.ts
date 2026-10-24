@@ -1,4 +1,3 @@
-import { APP_CONFIG } from '../constants/config';
 import { Photo } from '../types/property';
 
 export const SAVED_IMAGES = {

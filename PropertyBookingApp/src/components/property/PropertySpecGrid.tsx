@@ -2,8 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Property } from '../../types/property';
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
-import { borderRadius, spacing } from '../../theme/spacing';
+import { spacing } from '../../theme/spacing';
 import { formatBeds, formatBaths, formatSqft, formatPropertyType } from '../../utils/formatters';
 import { Icons } from '../common/Icons';
 

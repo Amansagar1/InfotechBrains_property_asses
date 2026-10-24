@@ -18,8 +18,7 @@ import {
 } from '../../constants/savedProperties';
 import { SavedPropertyCard } from '../../components/saved/SavedPropertyCard';
 import { Icons } from '../../components/common/Icons';
-import { fontFamilies, typography } from '../../theme/typography';
-import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 
 type SortOption = 'recently_saved' | 'price_low_high' | 'price_high_low' | 'sqft_largest';
 
@@ -38,7 +37,7 @@ const SORT_OPTIONS: SortItem[] = [
 export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
   navigation,
 }) => {
-  const [savedItems, setSavedItems] = useState<SavedPropertyItem[]>(INITIAL_SAVED_PROPERTIES);
+  const [savedItems] = useState<SavedPropertyItem[]>(INITIAL_SAVED_PROPERTIES);
   const [savedIds, setSavedIds] = useState<Set<string>>(
     new Set(INITIAL_SAVED_PROPERTIES.map(p => p.id))
   );

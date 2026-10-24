@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Property, Pagination } from '../types/property';
 import { getPropertyListings } from '../services/api/propertyApi';
 import { ApiError } from '../types/api';
@@ -13,11 +13,14 @@ export const usePropertyListings = (initialPage: number = 1, perPage: number = 1
   const [page, setPage] = useState<number>(initialPage);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
+  const listingsRef = useRef(listings);
+  listingsRef.current = listings;
+
   const fetchListings = useCallback(
     async (targetPage: number = 1, isRefresh: boolean = false) => {
       if (isRefresh) {
         setRefreshing(true);
-      } else if (targetPage === 1 && listings.length === 0) {
+      } else if (targetPage === 1 && listingsRef.current.length === 0) {
         setLoading(true);
       } else if (targetPage > 1) {
         setLoadingMore(true);

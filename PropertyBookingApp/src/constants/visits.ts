@@ -17,7 +17,7 @@ export const INITIAL_VISITS: ScheduledVisit[] = [
     year: '2026',
     timeSlot: '11:00 AM - 12:00 PM',
     status: 'upcoming',
-    localImage: require('../assets/images/maplewood_villa.jpg'),
+    localImage: require('../assets/images/saved_maplewood.jpg'),
     agent: {
       id: 'agent_01',
       name: 'Aditya Sharma',

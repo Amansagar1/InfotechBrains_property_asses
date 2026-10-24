@@ -9,8 +9,7 @@ import {
 } from 'react-native';
 import { SavedPropertyItem } from '../../constants/savedProperties';
 import { Icons } from '../common/Icons';
-import { typography, fontFamilies } from '../../theme/typography';
-import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 
 export interface SavedPropertyCardProps {
   property: SavedPropertyItem;

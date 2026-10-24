@@ -5,10 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  ScrollView,
 } from 'react-native';
 import { BookingFormData, BookingFormErrors } from '../../types/booking';
-import { colors } from '../../theme/colors';
 import { FormField } from '../common/FormField';
 import { Icons } from '../common/Icons';
 

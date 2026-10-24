@@ -3,7 +3,7 @@ import { BookingFormData, BookingFormErrors, BookingConfirmation } from '../type
 import { Property } from '../types/property';
 import { validateBookingForm } from '../utils/validators';
 import { submitVisitBooking } from '../services/api/propertyApi';
-import { COUNTRY_CODES, TIME_SLOTS } from '../constants/config';
+import { COUNTRY_CODES } from '../constants/config';
 
 export const useBookingForm = (property: Property) => {
   const [formData, setFormData] = useState<BookingFormData>({

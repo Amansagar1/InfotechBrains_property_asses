@@ -39,7 +39,7 @@ export const usePropertyDetails = (propertyId: string, initialProperty?: Propert
     } finally {
       setLoading(false);
     }
-  }, [propertyId]);
+  }, [propertyId, initialProperty]);
 
   useEffect(() => {
     fetchDetails();

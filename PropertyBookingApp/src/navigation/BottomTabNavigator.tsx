@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { BottomTabParamList } from '../types/navigation';
 import { PropertyListingScreen } from '../screens/listing/PropertyListingScreen';
@@ -8,20 +8,63 @@ import { VisitsScreen } from '../screens/visits/VisitsScreen';
 import { MessagesScreen } from '../screens/messages/MessagesScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { Icons } from '../components/common/Icons';
-import { colors } from '../theme/colors';
-import { typography } from '../theme/typography';
-import { spacing } from '../theme/spacing';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
-const PlaceholderScreen = ({ title }: { title: string }) => (
-  <View style={styles.placeholderContainer}>
-    <Text style={styles.placeholderTitle}>{title}</Text>
-    <Text style={styles.placeholderSubtitle}>
-      This feature is available in the full version.
-    </Text>
-  </View>
-);
+const DiscoverTabIcon = ({ focused }: { focused: boolean }) =>
+  focused ? (
+    <View style={styles.activeIconCircle}>
+      <Icons.Home size={17} color="#FFFFFF" />
+    </View>
+  ) : (
+    <View style={styles.inactiveIconWrapper}>
+      <Icons.Home size={20} color="#6B7280" />
+    </View>
+  );
+
+const SavedTabIcon = ({ focused }: { focused: boolean }) =>
+  focused ? (
+    <View style={styles.activeIconCircle}>
+      <Icons.Heart size={16} color="#FFFFFF" filled={true} />
+    </View>
+  ) : (
+    <View style={styles.inactiveIconWrapper}>
+      <Icons.Heart size={20} color="#6B7280" filled={false} />
+    </View>
+  );
+
+const VisitsTabIcon = ({ focused }: { focused: boolean }) =>
+  focused ? (
+    <View style={styles.activeIconCircle}>
+      <Icons.CalendarCheck size={17} color="#FFFFFF" />
+    </View>
+  ) : (
+    <View style={styles.inactiveIconWrapper}>
+      <Icons.CalendarCheck size={19} color="#6B7280" />
+    </View>
+  );
+
+const MessagesTabIcon = ({ focused }: { focused: boolean }) =>
+  focused ? (
+    <View style={styles.activeIconCircle}>
+      <Icons.MessageDots size={17} color="#FFFFFF" />
+    </View>
+  ) : (
+    <View style={styles.inactiveIconWrapper}>
+      <Icons.MessageDots size={19} color="#6B7280" />
+    </View>
+  );
+
+const ProfileTabIcon = ({ focused }: { focused: boolean }) =>
+  focused ? (
+    <View style={styles.activeIconCircle}>
+      <Icons.User size={17} color="#FFFFFF" />
+    </View>
+  ) : (
+    <View style={styles.inactiveIconWrapper}>
+      <Icons.User size={20} color="#6B7280" />
+    </View>
+  );
 
 export const BottomTabNavigator: React.FC = () => {
   return (
@@ -44,16 +87,7 @@ export const BottomTabNavigator: React.FC = () => {
         component={PropertyListingScreen}
         options={{
           tabBarLabel: 'Discover',
-          tabBarIcon: ({ focused }) =>
-            focused ? (
-              <View style={styles.activeIconCircle}>
-                <Icons.Home size={17} color="#FFFFFF" />
-              </View>
-            ) : (
-              <View style={styles.inactiveIconWrapper}>
-                <Icons.Home size={20} color="#6B7280" />
-              </View>
-            ),
+          tabBarIcon: DiscoverTabIcon,
         }}
       />
 
@@ -62,16 +96,7 @@ export const BottomTabNavigator: React.FC = () => {
         component={SavedPropertiesScreen}
         options={{
           tabBarLabel: 'Saved',
-          tabBarIcon: ({ focused }) =>
-            focused ? (
-              <View style={styles.activeIconCircle}>
-                <Icons.Heart size={16} color="#FFFFFF" filled={true} />
-              </View>
-            ) : (
-              <View style={styles.inactiveIconWrapper}>
-                <Icons.Heart size={20} color="#6B7280" filled={false} />
-              </View>
-            ),
+          tabBarIcon: SavedTabIcon,
         }}
       />
 
@@ -80,16 +105,7 @@ export const BottomTabNavigator: React.FC = () => {
         component={VisitsScreen}
         options={{
           tabBarLabel: 'Visits',
-          tabBarIcon: ({ focused }) =>
-            focused ? (
-              <View style={styles.activeIconCircle}>
-                <Icons.CalendarCheck size={17} color="#FFFFFF" />
-              </View>
-            ) : (
-              <View style={styles.inactiveIconWrapper}>
-                <Icons.CalendarCheck size={19} color="#6B7280" />
-              </View>
-            ),
+          tabBarIcon: VisitsTabIcon,
         }}
       />
 
@@ -98,16 +114,7 @@ export const BottomTabNavigator: React.FC = () => {
         component={MessagesScreen}
         options={{
           tabBarLabel: 'Messages',
-          tabBarIcon: ({ focused }) =>
-            focused ? (
-              <View style={styles.activeIconCircle}>
-                <Icons.MessageDots size={17} color="#FFFFFF" />
-              </View>
-            ) : (
-              <View style={styles.inactiveIconWrapper}>
-                <Icons.MessageDots size={19} color="#6B7280" />
-              </View>
-            ),
+          tabBarIcon: MessagesTabIcon,
         }}
       />
 
@@ -116,16 +123,7 @@ export const BottomTabNavigator: React.FC = () => {
         component={ProfileScreen}
         options={{
           tabBarLabel: 'Profile',
-          tabBarIcon: ({ focused }) =>
-            focused ? (
-              <View style={styles.activeIconCircle}>
-                <Icons.User size={17} color="#FFFFFF" />
-              </View>
-            ) : (
-              <View style={styles.inactiveIconWrapper}>
-                <Icons.User size={20} color="#6B7280" />
-              </View>
-            ),
+          tabBarIcon: ProfileTabIcon,
         }}
       />
     </Tab.Navigator>
@@ -180,22 +178,5 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     paddingTop: 0,
     lineHeight: 16,
-  },
-  placeholderContainer: {
-    flex: 1,
-    backgroundColor: '#FAF8F5',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.xl,
-  },
-  placeholderTitle: {
-    ...typography.h2,
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  placeholderSubtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
   },
 });

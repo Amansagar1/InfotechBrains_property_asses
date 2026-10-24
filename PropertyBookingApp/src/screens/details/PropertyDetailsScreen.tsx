@@ -22,7 +22,6 @@ import { Icons } from '../../components/common/Icons';
 import { colors } from '../../theme/colors';
 import { typography } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme/spacing';
-import { shadows } from '../../theme/shadows';
 import { formatPrice } from '../../utils/formatters';
 
 export type PropertyDetailsScreenProps = RootStackScreenProps<'PropertyDetails'>;

@@ -17,8 +17,12 @@ export const getPropertyListings = async (
   page: number = 1,
   perPage: number = 10
 ): Promise<PropertyListResponse> => {
+  console.log(`📡 [API CALL] getPropertyListings(page: ${page}, perPage: ${perPage})`);
   const response = await apiClient.get<PropertyListResponse>(
     ENDPOINTS.listings(page, perPage)
+  );
+  console.log(
+    `📋 [API DATA] Listings page ${page}: loaded ${response.data.data.length} properties. Total available: ${response.data.pagination?.total}`
   );
   return response.data;
 };
@@ -26,8 +30,12 @@ export const getPropertyListings = async (
 export const getPropertyDetails = async (
   propertyId: string
 ): Promise<Property> => {
+  console.log(`📡 [API CALL] getPropertyDetails(id: "${propertyId}")`);
   const response = await apiClient.get<Property>(
     ENDPOINTS.propertyDetails(propertyId)
+  );
+  console.log(
+    `🏠 [API DATA] Property details: "${response.data.address}", Price: $${response.data.price}, Type: ${response.data.property_type}`
   );
   return response.data;
 };
@@ -36,11 +44,16 @@ export const getPropertyPhotos = async (
   propertyId: string
 ): Promise<Photo[]> => {
   try {
+    console.log(`📡 [API CALL] getPropertyPhotos(id: "${propertyId}")`);
     const response = await apiClient.get<PropertyPhotosResponse>(
       ENDPOINTS.propertyPhotos(propertyId)
     );
+    console.log(
+      `📸 [API DATA] Photos for ${propertyId}: received ${response.data.photos?.length || 0} photos`
+    );
     return response.data.photos || [];
-  } catch {
+  } catch (err) {
+    console.warn(`⚠️ [API PHOTOS WARN] Photos endpoint for ${propertyId}: using listing photos fallback`);
     return [];
   }
 };
@@ -62,7 +75,8 @@ export const submitVisitBooking = async (
     beds: property.beds,
     baths: property.baths,
     sqft: property.sqft,
-    imageUrl: resolveImageUrl(property.photos?.[0]?.url, property.id),
+    imageUrl: property.photos?.[0]?.url || (property as any).featured_photo || '',
+    agent: property.agent,
   };
 
   const confirmation: BookingConfirmation = {

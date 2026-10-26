@@ -6,6 +6,7 @@ import { BottomTabNavigator } from './BottomTabNavigator';
 import { PropertyDetailsScreen } from '../screens/details/PropertyDetailsScreen';
 import { BookVisitScreen } from '../screens/booking/BookVisitScreen';
 import { BookingConfirmationScreen } from '../screens/confirmation/BookingConfirmationScreen';
+import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { colors } from '../theme/colors';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -31,6 +32,7 @@ export const AppNavigator: React.FC = () => {
             gestureEnabled: false,
           }}
         />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

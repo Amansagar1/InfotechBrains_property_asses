@@ -2,8 +2,9 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, ViewStyle } from 'react-native';
 import { PropertySummary } from '../../types/booking';
 import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 import { formatPrice } from '../../utils/formatters';
-import { getPropertyImageSource } from '../../utils/imageHelper';
+import { PropertyImage } from '../common/PropertyImage';
 import { Icons } from '../common/Icons';
 
 export interface PropertySummaryCardProps {
@@ -15,35 +16,18 @@ export const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
   property,
   style,
 }) => {
-  const displayTitle =
-    property.id === 'prop_001'
-      ? 'Maplewood Villa'
-      : property.id === 'prop_002'
-      ? 'Serene Heights'
-      : property.address.split(',')[0] || 'Modern Home';
-
-  const displayPrice =
-    property.id === 'prop_001'
-      ? '₹ 2.4 Cr'
-      : property.id === 'prop_002'
-      ? '₹ 1.35 Cr'
-      : formatPrice(property.price, property.currency);
-
+  const displayTitle = property.address ? property.address.split(',')[0] : 'Property';
+  const displayPrice = formatPrice(property.price, property.currency || 'USD');
   const locationText =
-    property.id === 'prop_001'
-      ? 'Whitefield, Bangalore'
-      : property.id === 'prop_002'
-      ? 'Sarjapur Road, Bangalore'
-      : property.city && property.state
+    property.city && property.state
       ? `${property.city}, ${property.state}`
       : property.address;
 
   return (
     <View style={[styles.card, style]}>
-      <Image
-        source={getPropertyImageSource(property)}
+      <PropertyImage
+        uri={property.imageUrl}
         style={styles.thumbnail}
-        resizeMode="cover"
       />
 
       <View style={styles.info}>
@@ -52,7 +36,7 @@ export const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
         </Text>
 
         <View style={styles.locationRow}>
-          <Icons.Pin size={14} color="#1A1A1A" />
+          <Icons.Pin size={14} color={colors.textSecondary} />
           <Text style={styles.locationText} numberOfLines={1}>
             {locationText}
           </Text>
@@ -92,10 +76,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 19,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 6,
   },
   locationRow: {
@@ -104,14 +88,16 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   locationText: {
-    fontSize: 13.5,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
     marginLeft: 6,
   },
   price: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
 });

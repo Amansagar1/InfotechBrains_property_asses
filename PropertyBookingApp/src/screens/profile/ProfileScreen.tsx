@@ -3,715 +3,372 @@ import {
   View,
   Text,
   Image,
-  TouchableOpacity,
   StyleSheet,
-  StatusBar,
+  TouchableOpacity,
   ScrollView,
-  SafeAreaView,
-  Platform,
+  StatusBar,
   Modal,
   TextInput,
-  Switch,
   Alert,
 } from 'react-native';
-import { ProfileScreenProps } from '../../types/navigation';
-import { UserProfile } from '../../types/profile';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { RootStackScreenProps } from '../../types/navigation';
 import { Icons } from '../../components/common/Icons';
+import { colors } from '../../theme/colors';
 import { fontFamilies } from '../../theme/typography';
+import { spacing, borderRadius } from '../../theme/spacing';
+import { useApp } from '../../context/AppContext';
 
-const botanicalRight = require('../../assets/images/details_botanical_clean.png');
-const defaultAvatar = require('../../assets/images/user_aman.jpg');
+export type ProfileScreenProps = RootStackScreenProps<'Profile'>;
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  const [user, setUser] = useState<UserProfile>({
-    name: 'Aman Sagar',
-    email: 'aman@example.com',
-    phone: '+91 98765 43210',
-    avatar: defaultAvatar,
-    savedCount: 3,
-    visitsCount: 2,
-    messagesCount: 4,
-    enquiriesCount: 1,
-  });
+  //-------------------- State & Handlers ----------------------
+  const { savedProperties, bookedVisits, userProfile, updateUserProfile } = useApp();
 
-  // Modal States
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showNotificationsModal, setShowNotificationsModal] = useState(false);
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
-  const [showSettingsModal, setShowSettingsModal] = useState(false);
-  const [showLogoutModal, setShowLogoutModal] = useState(false);
-
-  // Edit Profile Form State
-  const [editName, setEditName] = useState(user.name);
-  const [editEmail, setEditEmail] = useState(user.email);
-  const [editPhone, setEditPhone] = useState(user.phone);
-
-  // Notification Preferences State
-  const [notifVisits, setNotifVisits] = useState(true);
-  const [notifMessages, setNotifMessages] = useState(true);
-  const [notifPriceDrops, setNotifPriceDrops] = useState(true);
-  const [notifMarketing, setNotifMarketing] = useState(false);
-
-  // Privacy & Security State
-  const [biometricsEnabled, setBiometricsEnabled] = useState(true);
-  const [shareActivity, setShareActivity] = useState(false);
-
-  // App Settings State
-  const [selectedCurrency, setSelectedCurrency] = useState<'INR' | 'USD'>('INR');
-  const [selectedUnit, setSelectedUnit] = useState<'sqft' | 'sqm'>('sqft');
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editName, setEditName] = useState(userProfile.name);
+  const [editEmail, setEditEmail] = useState(userProfile.email);
+  const [editPhone, setEditPhone] = useState(userProfile.phone);
 
   const handleSaveProfile = () => {
-    setUser(prev => ({
-      ...prev,
-      name: editName.trim() || prev.name,
-      email: editEmail.trim() || prev.email,
-      phone: editPhone.trim() || prev.phone,
-    }));
-    setShowEditModal(false);
+    updateUserProfile({
+      name: editName.trim() || userProfile.name,
+      email: editEmail.trim() || userProfile.email,
+      phone: editPhone.trim() || userProfile.phone,
+    });
+    setIsEditModalVisible(false);
   };
 
-  const handleConfirmLogout = () => {
-    setShowLogoutModal(false);
-    Alert.alert('Logged Out', 'You have been safely signed out.');
+  const handleLogOut = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to sign out of your account?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Log Out',
+          style: 'destructive',
+          onPress: () => {
+            (navigation as any).navigate('MainTabs', { screen: 'Discover' });
+          },
+        },
+      ]
+    );
   };
 
+  //-------------------- Render ----------------------
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
       <StatusBar barStyle="dark-content" />
+
+      {/*-------------------- Top Botanical Background ----------------------*/}
+      <Image
+        source={require('../../assets/images/details_botanical_clean.png')}
+        style={styles.topBotanical}
+        resizeMode="contain"
+      />
+
+      {/*-------------------- Top Navigation Row ----------------------*/}
+      <View style={styles.topNavRow}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Icons.ArrowLeft size={20} color={colors.textPrimary} />
+        </TouchableOpacity>
+      </View>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* Header with Botanical Decoration */}
+        {/*-------------------- Title Header ----------------------*/}
         <View style={styles.header}>
-          {/* Decorative Organic Blob & Botanical Leaf top-right */}
-          <View style={styles.blobBackground} pointerEvents="none" />
-          <Image
-            source={botanicalRight}
-            style={styles.botanicalImage}
-            resizeMode="contain"
-            pointerEvents="none"
-          />
-
-          <View style={styles.titleContainer}>
-            <Text style={styles.headerTitle}>My Profile</Text>
-            <Text style={styles.headerSubtitle}>
-              Manage your account and preferences.
-            </Text>
-          </View>
+          <Text style={styles.title}>My Profile</Text>
+          <Text style={styles.subtitle}>
+            Manage your account and preferences.
+          </Text>
         </View>
 
-        {/* User Profile Card */}
+        {/*-------------------- Profile Card ----------------------*/}
         <View style={styles.profileCard}>
           <View style={styles.avatarWrapper}>
-            <Image source={user.avatar} style={styles.avatarImage} />
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => {
-                setEditName(user.name);
-                setEditEmail(user.email);
-                setEditPhone(user.phone);
-                setShowEditModal(true);
-              }}
-              style={styles.editPencilBadge}
-            >
+            <Image
+              source={require('../../assets/images/avatar.png')}
+              style={styles.avatarImage}
+            />
+            <View style={styles.editAvatarBadge}>
               <Icons.Pencil size={11} color="#FFFFFF" />
-            </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.profileInfo}>
             <Text style={styles.profileName} numberOfLines={1}>
-              {user.name}
+              {userProfile.name}
             </Text>
-            <Text style={styles.profileMeta} numberOfLines={1}>
-              {user.email}
+            <Text style={styles.profileEmail} numberOfLines={1}>
+              {userProfile.email}
             </Text>
-            <Text style={styles.profileMeta} numberOfLines={1}>
-              {user.phone}
+            <Text style={styles.profilePhone}>
+              {userProfile.phone}
             </Text>
           </View>
 
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => {
-              setEditName(user.name);
-              setEditEmail(user.email);
-              setEditPhone(user.phone);
-              setShowEditModal(true);
+              setEditName(userProfile.name);
+              setEditEmail(userProfile.email);
+              setEditPhone(userProfile.phone);
+              setIsEditModalVisible(true);
             }}
             style={styles.editProfileButton}
           >
-            <Text style={styles.editProfileButtonText}>Edit Profile</Text>
+            <Text style={styles.editProfileText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Summary Stats Grid */}
+        {/*-------------------- Quick Stats ----------------------*/}
         <View style={styles.statsCard}>
           <TouchableOpacity
             activeOpacity={0.75}
-            onPress={() => navigation.navigate('Saved')}
-            style={styles.statColumn}
+            onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Saved' })}
+            style={styles.statItem}
           >
-            <Icons.Heart size={21} color="#1E3E2F" filled={true} />
-            <Text style={styles.statCount}>{user.savedCount}</Text>
-            <Text style={styles.statLabel}>Saved{'\n'}Properties</Text>
+            <View style={styles.statIconWrapper}>
+              <Icons.Heart size={20} color={colors.primary} filled={false} />
+            </View>
+            <Text style={styles.statNumber}>{savedProperties.length}</Text>
+            <Text style={styles.statLabel}>Saved{'\n'}Homes</Text>
           </TouchableOpacity>
 
           <View style={styles.statDivider} />
 
           <TouchableOpacity
             activeOpacity={0.75}
-            onPress={() => navigation.navigate('Visits')}
-            style={styles.statColumn}
+            onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Visits' })}
+            style={styles.statItem}
           >
-            <Icons.CalendarCheck size={21} color="#1E3E2F" />
-            <Text style={styles.statCount}>{user.visitsCount}</Text>
-            <Text style={styles.statLabel}>Property{'\n'}Visits</Text>
+            <View style={styles.statIconWrapper}>
+              <Icons.CalendarCheck size={20} color={colors.primary} />
+            </View>
+            <Text style={styles.statNumber}>{bookedVisits.length}</Text>
+            <Text style={styles.statLabel}>Total{'\n'}Visits</Text>
           </TouchableOpacity>
 
           <View style={styles.statDivider} />
 
           <TouchableOpacity
             activeOpacity={0.75}
-            onPress={() => navigation.navigate('Messages')}
-            style={styles.statColumn}
+            onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Visits' })}
+            style={styles.statItem}
           >
-            <Icons.MessageDots size={21} color="#1E3E2F" />
-            <Text style={styles.statCount}>{user.messagesCount}</Text>
-            <Text style={styles.statLabel}>Messages</Text>
+            <View style={styles.statIconWrapper}>
+              <Icons.Clock size={20} color={colors.primary} />
+            </View>
+            <Text style={styles.statNumber}>
+              {bookedVisits.filter(v => v.status === 'upcoming').length}
+            </Text>
+            <Text style={styles.statLabel}>Upcoming{'\n'}Visits</Text>
           </TouchableOpacity>
 
           <View style={styles.statDivider} />
 
           <TouchableOpacity
             activeOpacity={0.75}
-            onPress={() => navigation.navigate('Discover')}
-            style={styles.statColumn}
+            onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Visits' })}
+            style={styles.statItem}
           >
-            <Icons.Home size={21} color="#1E3E2F" />
-            <Text style={styles.statCount}>{user.enquiriesCount}</Text>
-            <Text style={styles.statLabel}>Enquiries</Text>
+            <View style={styles.statIconWrapper}>
+              <Icons.CheckCircle size={20} color={colors.primary} />
+            </View>
+            <Text style={styles.statNumber}>
+              {bookedVisits.filter(v => v.status === 'completed' || v.status === 'cancelled').length}
+            </Text>
+            <Text style={styles.statLabel}>Past{'\n'}Visits</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Main Settings Menu Card */}
+        {/*-------------------- Menu Options ----------------------*/}
         <View style={styles.menuCard}>
-          {/* 1. Personal Information */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => {
-              setEditName(user.name);
-              setEditEmail(user.email);
-              setEditPhone(user.phone);
-              setShowEditModal(true);
-            }}
-            style={styles.menuRow}
+            onPress={() => setIsEditModalVisible(true)}
+            style={styles.menuItem}
           >
-            <View style={styles.iconCircle}>
-              <Icons.User size={20} color="#1E3E2F" />
+            <View style={styles.menuIconContainer}>
+              <Icons.User size={18} color={colors.primary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuTitle}>Personal Information</Text>
-              <Text style={styles.menuSubtitle}>
-                Name, email, phone number
-              </Text>
+              <Text style={styles.menuSubtitle}>{userProfile.email || 'Name, email, phone number'}</Text>
             </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
+            <Icons.ChevronRight size={16} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <View style={styles.menuRowDivider} />
+          <View style={styles.menuDivider} />
 
-          {/* 2. Saved Properties */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => navigation.navigate('Saved')}
-            style={styles.menuRow}
+            onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Saved' })}
+            style={styles.menuItem}
           >
-            <View style={styles.iconCircle}>
-              <Icons.Heart size={20} color="#1E3E2F" filled={false} />
+            <View style={styles.menuIconContainer}>
+              <Icons.Heart size={18} color={colors.primary} filled={false} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuTitle}>Saved Properties</Text>
               <Text style={styles.menuSubtitle}>
-                View and manage your saved properties
+                {savedProperties.length === 1
+                  ? '1 property saved in your shortlist'
+                  : `${savedProperties.length} properties saved in your shortlist`}
               </Text>
             </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
+            <Icons.ChevronRight size={16} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <View style={styles.menuRowDivider} />
+          <View style={styles.menuDivider} />
 
-          {/* 3. My Visits */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => navigation.navigate('Visits')}
-            style={styles.menuRow}
+            onPress={() => (navigation as any).navigate('MainTabs', { screen: 'Visits' })}
+            style={styles.menuItem}
           >
-            <View style={styles.iconCircle}>
-              <Icons.CalendarCheck size={20} color="#1E3E2F" />
+            <View style={styles.menuIconContainer}>
+              <Icons.CalendarCheck size={18} color={colors.primary} />
             </View>
             <View style={styles.menuTextContainer}>
-              <Text style={styles.menuTitle}>My Visits</Text>
+              <Text style={styles.menuTitle}>My Scheduled Visits</Text>
               <Text style={styles.menuSubtitle}>
-                Upcoming and past property visits
+                {bookedVisits.length === 1
+                  ? '1 active visit scheduled'
+                  : `${bookedVisits.length} visits scheduled & tracked`}
               </Text>
             </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
+            <Icons.ChevronRight size={16} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <View style={styles.menuRowDivider} />
+          <View style={styles.menuDivider} />
 
-          {/* 4. Messages */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => navigation.navigate('Messages')}
-            style={styles.menuRow}
+            onPress={() => Alert.alert('Notifications', 'All push notifications are enabled.')}
+            style={styles.menuItem}
           >
-            <View style={styles.iconCircle}>
-              <Icons.Chat size={20} color="#1E3E2F" />
-            </View>
-            <View style={styles.menuTextContainer}>
-              <Text style={styles.menuTitle}>Messages</Text>
-              <Text style={styles.menuSubtitle}>
-                Chat with property owners and agents
-              </Text>
-            </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
-          </TouchableOpacity>
-
-          <View style={styles.menuRowDivider} />
-
-          {/* 5. Notifications */}
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => setShowNotificationsModal(true)}
-            style={styles.menuRow}
-          >
-            <View style={styles.iconCircle}>
-              <Icons.Bell size={20} color="#1E3E2F" />
+            <View style={styles.menuIconContainer}>
+              <Icons.Bell size={18} color={colors.primary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuTitle}>Notifications</Text>
-              <Text style={styles.menuSubtitle}>
-                Manage your notification preferences
-              </Text>
+              <Text style={styles.menuSubtitle}>Manage your notification preferences</Text>
             </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
+            <Icons.ChevronRight size={16} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <View style={styles.menuRowDivider} />
+          <View style={styles.menuDivider} />
 
-          {/* 6. Privacy & Security */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => setShowPrivacyModal(true)}
-            style={styles.menuRow}
+            onPress={() => Alert.alert('Privacy & Security', 'Your data is encrypted and protected.')}
+            style={styles.menuItem}
           >
-            <View style={styles.iconCircle}>
-              <Icons.Shield size={20} color="#1E3E2F" />
+            <View style={styles.menuIconContainer}>
+              <Icons.Shield size={18} color={colors.primary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuTitle}>Privacy & Security</Text>
-              <Text style={styles.menuSubtitle}>
-                Manage your privacy settings
-              </Text>
+              <Text style={styles.menuSubtitle}>Manage your data and privacy settings</Text>
             </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
+            <Icons.ChevronRight size={16} color={colors.textTertiary} />
           </TouchableOpacity>
 
-          <View style={styles.menuRowDivider} />
+          <View style={styles.menuDivider} />
 
-          {/* 7. App Settings */}
           <TouchableOpacity
             activeOpacity={0.7}
-            onPress={() => setShowSettingsModal(true)}
-            style={styles.menuRow}
+            onPress={() => Alert.alert('App Settings', 'Version 1.0.0 (Release Build 2026)')}
+            style={styles.menuItem}
           >
-            <View style={styles.iconCircle}>
-              <Icons.Settings size={20} color="#1E3E2F" />
+            <View style={styles.menuIconContainer}>
+              <Icons.Settings size={18} color={colors.primary} />
             </View>
             <View style={styles.menuTextContainer}>
               <Text style={styles.menuTitle}>App Settings</Text>
-              <Text style={styles.menuSubtitle}>
-                Language, appearance and more
-              </Text>
+              <Text style={styles.menuSubtitle}>Language, appearance, and version info</Text>
             </View>
-            <Icons.ChevronRight size={17} color="#9CA3AF" />
+            <Icons.ChevronRight size={16} color={colors.textTertiary} />
           </TouchableOpacity>
         </View>
 
-        {/* Log Out Card */}
+        {/*-------------------- Log Out Option ----------------------*/}
         <TouchableOpacity
           activeOpacity={0.8}
-          onPress={() => setShowLogoutModal(true)}
+          onPress={handleLogOut}
           style={styles.logoutCard}
         >
-          <View style={styles.logoutIconCircle}>
-            <Icons.LogOut size={20} color="#DC2626" />
+          <View style={styles.logoutIconContainer}>
+            <Icons.LogOut size={18} color="#DC2626" />
           </View>
           <View style={styles.menuTextContainer}>
             <Text style={styles.logoutTitle}>Log Out</Text>
-            <Text style={styles.menuSubtitle}>Sign out from your account</Text>
+            <Text style={styles.logoutSubtitle}>Sign out from your account</Text>
           </View>
-          <Icons.ChevronRight size={17} color="#9CA3AF" />
+          <Icons.ChevronRight size={16} color="#DC2626" />
         </TouchableOpacity>
       </ScrollView>
 
-      {/* 1. Edit Profile Modal */}
+      {/*-------------------- Edit Profile Modal ----------------------*/}
       <Modal
-        visible={showEditModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowEditModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Edit Profile</Text>
-              <TouchableOpacity
-                onPress={() => setShowEditModal(false)}
-                style={styles.modalCloseButton}
-              >
-                <Icons.Close size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalFieldGroup}>
-              <Text style={styles.fieldLabel}>Full Name</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={editName}
-                onChangeText={setEditName}
-                placeholder="Enter full name"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-
-            <View style={styles.modalFieldGroup}>
-              <Text style={styles.fieldLabel}>Email Address</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={editEmail}
-                onChangeText={setEditEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                placeholder="Enter email address"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-
-            <View style={styles.modalFieldGroup}>
-              <Text style={styles.fieldLabel}>Phone Number</Text>
-              <TextInput
-                style={styles.fieldInput}
-                value={editPhone}
-                onChangeText={setEditPhone}
-                keyboardType="phone-pad"
-                placeholder="Enter phone number"
-                placeholderTextColor="#9CA3AF"
-              />
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={handleSaveProfile}
-              style={styles.primaryActionButton}
-            >
-              <Text style={styles.primaryActionButtonText}>Save Changes</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 2. Notifications Modal */}
-      <Modal
-        visible={showNotificationsModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowNotificationsModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Notification Settings</Text>
-              <TouchableOpacity
-                onPress={() => setShowNotificationsModal(false)}
-                style={styles.modalCloseButton}
-              >
-                <Icons.Close size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Visit Reminders</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Alerts for scheduled site visits
-                </Text>
-              </View>
-              <Switch
-                value={notifVisits}
-                onValueChange={setNotifVisits}
-                trackColor={{ false: '#D1D5DB', true: '#1E3E2F' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>New Messages</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Notifications from property owners & agents
-                </Text>
-              </View>
-              <Switch
-                value={notifMessages}
-                onValueChange={setNotifMessages}
-                trackColor={{ false: '#D1D5DB', true: '#1E3E2F' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Price Drop Alerts</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Get notified when saved properties change price
-                </Text>
-              </View>
-              <Switch
-                value={notifPriceDrops}
-                onValueChange={setNotifPriceDrops}
-                trackColor={{ false: '#D1D5DB', true: '#1E3E2F' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Recommended Listings</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Curated properties tailored to your searches
-                </Text>
-              </View>
-              <Switch
-                value={notifMarketing}
-                onValueChange={setNotifMarketing}
-                trackColor={{ false: '#D1D5DB', true: '#1E3E2F' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setShowNotificationsModal(false)}
-              style={styles.primaryActionButton}
-            >
-              <Text style={styles.primaryActionButtonText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 3. Privacy & Security Modal */}
-      <Modal
-        visible={showPrivacyModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowPrivacyModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Privacy & Security</Text>
-              <TouchableOpacity
-                onPress={() => setShowPrivacyModal(false)}
-                style={styles.modalCloseButton}
-              >
-                <Icons.Close size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Biometric App Lock</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Require Fingerprint / Face ID to open app
-                </Text>
-              </View>
-              <Switch
-                value={biometricsEnabled}
-                onValueChange={setBiometricsEnabled}
-                trackColor={{ false: '#D1D5DB', true: '#1E3E2F' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <View style={styles.toggleRow}>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>Search Activity Sharing</Text>
-                <Text style={styles.toggleSubtitle}>
-                  Allow verified agents to match preferred homes
-                </Text>
-              </View>
-              <Switch
-                value={shareActivity}
-                onValueChange={setShareActivity}
-                trackColor={{ false: '#D1D5DB', true: '#1E3E2F' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setShowPrivacyModal(false)}
-              style={styles.primaryActionButton}
-            >
-              <Text style={styles.primaryActionButtonText}>Save Settings</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 4. App Settings Modal */}
-      <Modal
-        visible={showSettingsModal}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowSettingsModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalSheet}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>App Settings</Text>
-              <TouchableOpacity
-                onPress={() => setShowSettingsModal(false)}
-                style={styles.modalCloseButton}
-              >
-                <Icons.Close size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.settingsSectionTitle}>Currency Preference</Text>
-            <View style={styles.pillSelectorRow}>
-              <TouchableOpacity
-                onPress={() => setSelectedCurrency('INR')}
-                style={[
-                  styles.pillOption,
-                  selectedCurrency === 'INR' && styles.pillOptionActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    selectedCurrency === 'INR' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  ₹ INR (Indian Rupee)
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSelectedCurrency('USD')}
-                style={[
-                  styles.pillOption,
-                  selectedCurrency === 'USD' && styles.pillOptionActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    selectedCurrency === 'USD' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  $ USD (US Dollar)
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.settingsSectionTitle}>Unit of Measurement</Text>
-            <View style={styles.pillSelectorRow}>
-              <TouchableOpacity
-                onPress={() => setSelectedUnit('sqft')}
-                style={[
-                  styles.pillOption,
-                  selectedUnit === 'sqft' && styles.pillOptionActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    selectedUnit === 'sqft' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  sq ft (Square Feet)
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => setSelectedUnit('sqm')}
-                style={[
-                  styles.pillOption,
-                  selectedUnit === 'sqm' && styles.pillOptionActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    selectedUnit === 'sqm' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  sq m (Square Meters)
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.versionContainer}>
-              <Text style={styles.versionText}>
-                Luxury Real Estate App v1.2.0 • Bangalore Edition
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              activeOpacity={0.85}
-              onPress={() => setShowSettingsModal(false)}
-              style={styles.primaryActionButton}
-            >
-              <Text style={styles.primaryActionButtonText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 5. Log Out Confirmation Modal */}
-      <Modal
-        visible={showLogoutModal}
+        visible={isEditModalVisible}
+        transparent
         animationType="fade"
-        transparent={true}
-        onRequestClose={() => setShowLogoutModal(false)}
+        onRequestClose={() => setIsEditModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.alertCard}>
-            <View style={styles.alertIconCircle}>
-              <Icons.LogOut size={26} color="#DC2626" />
-            </View>
-            <Text style={styles.alertTitle}>Log Out</Text>
-            <Text style={styles.alertMessage}>
-              Are you sure you want to sign out of your account?
-            </Text>
-            <View style={styles.alertActionsRow}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalHeader}>Edit Profile</Text>
+
+            <Text style={styles.inputLabel}>Full Name</Text>
+            <TextInput
+              style={styles.textInput}
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="Your name"
+            />
+
+            <Text style={styles.inputLabel}>Email Address</Text>
+            <TextInput
+              style={styles.textInput}
+              value={editEmail}
+              onChangeText={setEditEmail}
+              placeholder="Your email"
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text style={styles.inputLabel}>Phone Number</Text>
+            <TextInput
+              style={styles.textInput}
+              value={editPhone}
+              onChangeText={setEditPhone}
+              placeholder="Your phone"
+              keyboardType="phone-pad"
+            />
+
+            <View style={styles.modalActions}>
               <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowLogoutModal(false)}
-                style={styles.alertCancelButton}
+                style={styles.modalCancelButton}
+                onPress={() => setIsEditModalVisible(false)}
               >
-                <Text style={styles.alertCancelButtonText}>Cancel</Text>
+                <Text style={styles.modalCancelText}>Cancel</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
-                activeOpacity={0.85}
-                onPress={handleConfirmLogout}
-                style={styles.alertConfirmButton}
+                style={styles.modalSaveButton}
+                onPress={handleSaveProfile}
               >
-                <Text style={styles.alertConfirmButtonText}>Log Out</Text>
+                <Text style={styles.modalSaveText}>Save Changes</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -721,439 +378,326 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAF8F5',
+    backgroundColor: '#FAF9F6',
   },
-  scrollContent: {
-    paddingBottom: 24,
-  },
-  header: {
-    position: 'relative',
-    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight ?? 24) + 12 : 16,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-    overflow: 'hidden',
-  },
-  blobBackground: {
+  topBotanical: {
     position: 'absolute',
-    top: -25,
-    right: -25,
-    width: 170,
-    height: 170,
-    borderRadius: 85,
-    backgroundColor: '#ECE7DC',
-    opacity: 0.65,
+    top: 0,
+    right: 0,
+    width: 140,
+    height: 140,
+    opacity: 0.6,
   },
-  botanicalImage: {
-    position: 'absolute',
-    top: -10,
-    right: -5,
-    width: 95,
-    height: 175,
-    opacity: 0.85,
+  topNavRow: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 4,
+    zIndex: 10,
   },
-  titleContainer: {
-    maxWidth: '75%',
-  },
-  headerTitle: {
-    fontFamily: fontFamilies.heading,
-    fontSize: 34,
-    fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.5,
-  },
-  headerSubtitle: {
-    fontSize: 14.5,
-    color: '#6B7280',
-    marginTop: 5,
-    lineHeight: 21,
-  },
-  profileCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: borderRadius.round,
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 48,
+  },
+  header: {
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  title: {
+    fontFamily: fontFamilies.headingSemiBold,
+    fontSize: 32,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  profileCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#D8D4CA',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.04,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 2,
   },
   avatarWrapper: {
     position: 'relative',
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    marginRight: 14,
   },
   avatarImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: '#E5E7EB',
+    width: 68,
+    height: 68,
+    borderRadius: 34,
   },
-  editPencilBadge: {
+  editAvatarBadge: {
     position: 'absolute',
     bottom: -2,
     right: -2,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#1E3E2F',
-    alignItems: 'center',
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.primary,
     justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 2,
     borderColor: '#FFFFFF',
   },
   profileInfo: {
     flex: 1,
-    marginLeft: 14,
-    justifyContent: 'center',
+    marginRight: 8,
   },
   profileName: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.3,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 2,
   },
-  profileMeta: {
-    fontSize: 13.5,
-    color: '#6B7280',
-    marginTop: 2,
+  profileEmail: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14.5,
+    fontWeight: '500',
+    color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  profilePhone: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
   },
   editProfileButton: {
-    borderWidth: 1,
-    borderColor: '#1E3E2F',
-    borderRadius: 20,
-    paddingHorizontal: 14,
     paddingVertical: 7,
+    paddingHorizontal: 13,
+    borderRadius: 16,
+    borderWidth: 1.2,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
-  editProfileButtonText: {
-    fontSize: 13,
+  editProfileText: {
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 12.5,
     fontWeight: '600',
-    color: '#1E3E2F',
+    color: colors.textPrimary,
   },
   statsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    paddingVertical: 14,
-    paddingHorizontal: 8,
-    marginHorizontal: 16,
+    justifyContent: 'space-between',
     marginBottom: 16,
+    borderWidth: 1.5,
+    borderColor: '#D8D4CA',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.03,
-    shadowRadius: 5,
+    shadowRadius: 6,
     elevation: 2,
   },
-  statColumn: {
+  statItem: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  statCount: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
-    marginTop: 6,
+  statIconWrapper: {
+    marginBottom: 4,
+  },
+  statNumber: {
+    fontFamily: fontFamilies.headingSemiBold,
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 2,
   },
   statLabel: {
-    fontSize: 11.5,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 12.5,
+    fontWeight: '500',
+    color: colors.textSecondary,
     textAlign: 'center',
-    marginTop: 2,
     lineHeight: 15,
   },
   statDivider: {
     width: 1,
-    height: 36,
-    backgroundColor: '#ECEAE4',
+    height: 38,
+    backgroundColor: '#D8D4CA',
   },
   menuCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    marginHorizontal: 16,
-    overflow: 'hidden',
+    borderRadius: 22,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    marginBottom: 14,
+    borderWidth: 1.5,
+    borderColor: '#D8D4CA',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.03,
-    shadowRadius: 5,
+    shadowRadius: 8,
     elevation: 2,
   },
-  menuRow: {
+  menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 14,
-    paddingHorizontal: 16,
   },
-  iconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#EDF5F1',
-    alignItems: 'center',
+  menuIconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F0EFEA',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
   },
   menuTextContainer: {
     flex: 1,
-    marginLeft: 14,
   },
   menuTitle: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    letterSpacing: -0.2,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 2,
   },
   menuSubtitle: {
-    fontSize: 12.5,
-    color: '#6B7280',
-    marginTop: 2,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13.5,
+    fontWeight: '500',
+    color: colors.textSecondary,
   },
-  menuRowDivider: {
+  menuDivider: {
     height: 1,
-    backgroundColor: '#F3F1EC',
-    marginLeft: 72,
+    backgroundColor: '#E7E5DD',
   },
   logoutCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FFFFFF',
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    marginHorizontal: 16,
-    marginTop: 14,
+    borderRadius: 20,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 5,
-    elevation: 2,
-  },
-  logoutIconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: '#FEE2E2',
+    flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#FCE8E6',
+  },
+  logoutIconContainer: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#FCE8E6',
     justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
   },
   logoutTitle: {
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#DC2626',
-    letterSpacing: -0.2,
+    marginBottom: 2,
   },
-
-  /* Modal Sheets */
+  logoutSubtitle: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13.5,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
-    justifyContent: 'flex-end',
-  },
-  modalSheet: {
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 20,
-    paddingTop: 18,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 18,
-  },
-  modalTitle: {
-    fontFamily: fontFamilies.heading,
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  modalCloseButton: {
-    padding: 6,
-  },
-  modalFieldGroup: {
-    marginBottom: 16,
-  },
-  fieldLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#374151',
-    marginBottom: 6,
-  },
-  fieldInput: {
-    backgroundColor: '#F5F3EF',
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: '#111827',
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-  },
-  primaryActionButton: {
-    backgroundColor: '#1E3E2F',
-    borderRadius: 16,
-    paddingVertical: 14,
-    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 10,
-  },
-  primaryActionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15.5,
-    fontWeight: '700',
-  },
-  toggleRow: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F1EC',
+    padding: 24,
   },
-  toggleTextContainer: {
-    flex: 1,
-    marginRight: 14,
-  },
-  toggleTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  toggleSubtitle: {
-    fontSize: 12.5,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  settingsSectionTitle: {
-    fontSize: 13.5,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 8,
-    marginBottom: 8,
-  },
-  pillSelectorRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 14,
-  },
-  pillOption: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#ECEAE4',
-    backgroundColor: '#F9F8F5',
-    alignItems: 'center',
-  },
-  pillOptionActive: {
-    backgroundColor: '#EDF5F1',
-    borderColor: '#1E3E2F',
-  },
-  pillOptionText: {
-    fontSize: 12.5,
-    color: '#4B5563',
-    fontWeight: '500',
-  },
-  pillOptionTextActive: {
-    color: '#1E3E2F',
-    fontWeight: '700',
-  },
-  versionContainer: {
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  versionText: {
-    fontSize: 12,
-    color: '#9CA3AF',
-  },
-
-  /* Alert Card for Log Out */
-  alertCard: {
+  modalContent: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
     padding: 22,
-    marginHorizontal: 24,
-    marginBottom: 'auto',
-    marginTop: 'auto',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 8,
-  },
-  alertIconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FEE2E2',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 14,
-  },
-  alertTitle: {
-    fontFamily: fontFamilies.heading,
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 6,
-  },
-  alertMessage: {
-    fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 20,
-  },
-  alertActionsRow: {
-    flexDirection: 'row',
-    gap: 12,
     width: '100%',
+    maxWidth: 360,
   },
-  alertCancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 14,
+  modalHeader: {
+    fontFamily: fontFamilies.headingSemiBold,
+    fontSize: 22,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 6,
+    marginTop: 8,
+  },
+  textInput: {
+    backgroundColor: '#FAF9F6',
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#ECEAE4',
-    alignItems: 'center',
-    backgroundColor: '#F9F8F5',
+    borderColor: colors.border,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    fontSize: 15,
+    fontFamily: fontFamilies.bodyMedium,
+    fontWeight: '500',
+    color: colors.textPrimary,
   },
-  alertCancelButtonText: {
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginTop: 22,
+  },
+  modalCancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginRight: 10,
+  },
+  modalCancelText: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14.5,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  modalSaveButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+  },
+  modalSaveText: {
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 14.5,
     fontWeight: '600',
-    color: '#374151',
-  },
-  alertConfirmButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 14,
-    backgroundColor: '#DC2626',
-    alignItems: 'center',
-  },
-  alertConfirmButtonText: {
-    fontSize: 14.5,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    color: colors.textLight,
   },
 });

@@ -2,11 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Property, Pagination } from '../types/property';
 import { getPropertyListings } from '../services/api/propertyApi';
 import { ApiError } from '../types/api';
-import { INITIAL_SAVED_PROPERTIES } from '../constants/savedProperties';
-
 export const usePropertyListings = (initialPage: number = 1, perPage: number = 10) => {
-  const [listings, setListings] = useState<Property[]>(INITIAL_SAVED_PROPERTIES);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [listings, setListings] = useState<Property[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

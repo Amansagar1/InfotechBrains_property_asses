@@ -16,7 +16,7 @@ import Svg, { Path } from 'react-native-svg';
 import { Property, Photo } from '../../types/property';
 import { colors } from '../../theme/colors';
 import { borderRadius, spacing } from '../../theme/spacing';
-import { getPropertyPhotoGallery } from '../../utils/imageHelper';
+import { PropertyImage } from '../common/PropertyImage';
 import { Icons } from '../common/Icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -40,12 +40,18 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
   isFavorite = false,
 }) => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
-  const images = getPropertyPhotoGallery(property || (photos ? { photos } : null));
+
+  const galleryPhotos: Photo[] =
+    photos && photos.length > 0
+      ? photos
+      : property?.photos && property.photos.length > 0
+      ? property.photos
+      : [{ url: '', caption: 'Property Photo' }];
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const contentOffsetX = event.nativeEvent.contentOffset.x;
     const currentIndex = Math.round(contentOffsetX / SCREEN_WIDTH);
-    if (currentIndex !== activeIndex && currentIndex >= 0 && currentIndex < images.length) {
+    if (currentIndex !== activeIndex && currentIndex >= 0 && currentIndex < galleryPhotos.length) {
       setActiveIndex(currentIndex);
     }
   };
@@ -59,17 +65,25 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         onMomentumScrollEnd={handleScroll}
         style={styles.scrollView}
       >
-        {images.map((imgSrc, index) => (
-          <Image
-            key={`photo-${index}`}
-            source={typeof imgSrc === 'number' ? imgSrc : imgSrc}
-            style={styles.image}
-            resizeMode="cover"
-          />
+        {galleryPhotos.map((photo, index) => (
+          <View key={`photo-${index}`} style={styles.imageSlide}>
+            <PropertyImage
+              uri={photo.url}
+              style={styles.image}
+              propertyType={property?.property_type}
+            />
+            {photo.caption ? (
+              <View style={styles.photoCaptionBadge}>
+                <Text style={styles.photoCaptionText} numberOfLines={1}>
+                  {photo.caption}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         ))}
       </ScrollView>
 
-      {/* Aesthetic Organic Wave Cut Overlay at Bottom */}
+      {/*-------------------- Wave Cut Overlay ----------------------*/}
       <View style={styles.curveContainer} pointerEvents="none">
         <Svg
           width={SCREEN_WIDTH}
@@ -84,7 +98,7 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         </Svg>
       </View>
 
-      {/* Top Floating Action Controls */}
+      {/*-------------------- Top Floating Action Controls ----------------------*/}
       <View style={styles.topBar}>
         {onBackPress && (
           <TouchableOpacity
@@ -101,7 +115,10 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={onFavoritePress}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               style={[styles.iconButton, styles.marginRight]}
+              accessibilityLabel="Save property"
+              accessibilityRole="button"
             >
               <Icons.Heart
                 size={18}
@@ -115,7 +132,10 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
             <TouchableOpacity
               activeOpacity={0.8}
               onPress={onSharePress}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
               style={styles.iconButton}
+              accessibilityLabel="Share property"
+              accessibilityRole="button"
             >
               <Icons.Share size={18} color={colors.textPrimary} />
             </TouchableOpacity>
@@ -123,16 +143,17 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
         </View>
       </View>
 
-      {/* Photo Counter Badge: 1/8 */}
+      {/*-------------------- Photo Counter Badge ----------------------*/}
       <View style={styles.counterPill}>
         <Text style={styles.counterText}>
-          {activeIndex + 1}/{images.length}
+          {activeIndex + 1}/{galleryPhotos.length}
         </Text>
       </View>
     </View>
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   container: {
     height: GALLERY_HEIGHT,
@@ -144,9 +165,30 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  imageSlide: {
+    width: SCREEN_WIDTH,
+    height: GALLERY_HEIGHT,
+    position: 'relative',
+  },
   image: {
     width: SCREEN_WIDTH,
     height: GALLERY_HEIGHT,
+  },
+  photoCaptionBadge: {
+    position: 'absolute',
+    bottom: 50,
+    left: spacing.lg,
+    backgroundColor: 'rgba(20, 28, 20, 0.75)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: borderRadius.round,
+    zIndex: 6,
+    maxWidth: SCREEN_WIDTH - 120,
+  },
+  photoCaptionText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '500',
   },
   curveContainer: {
     position: 'absolute',
@@ -164,6 +206,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     zIndex: 10,
+    elevation: 10,
   },
   rightIcons: {
     flexDirection: 'row',

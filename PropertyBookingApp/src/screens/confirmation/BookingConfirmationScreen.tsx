@@ -12,7 +12,9 @@ import Svg, { Path } from 'react-native-svg';
 import { RootStackScreenProps } from '../../types/navigation';
 import { Icons } from '../../components/common/Icons';
 import { formatPrice, formatDate } from '../../utils/formatters';
-import { getPropertyImageSource } from '../../utils/imageHelper';
+import { PropertyImage } from '../../components/common/PropertyImage';
+import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 
 export type BookingConfirmationScreenProps = RootStackScreenProps<'BookingConfirmation'>;
 
@@ -26,35 +28,23 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
     navigation.popToTop();
   };
 
+  const handleViewRequests = () => {
+    (navigation as any).navigate('MainTabs', { screen: 'Visits' });
+  };
+
   const property = confirmation.property;
   const visitor = confirmation.visitor;
 
-  const displayTitle =
-    property.id === 'prop_001'
-      ? 'Maplewood Villa'
-      : property.id === 'prop_002'
-      ? 'Serene Heights'
-      : property.address.split(',')[0] || 'Modern Home';
-
-  const displayPrice =
-    property.id === 'prop_001'
-      ? '₹ 2.4 Cr'
-      : property.id === 'prop_002'
-      ? '₹ 1.35 Cr'
-      : formatPrice(property.price, property.currency);
-
+  const displayTitle = property.address ? property.address.split(',')[0] : 'Property';
+  const displayPrice = formatPrice(property.price, property.currency || 'USD');
   const locationText =
-    property.id === 'prop_001'
-      ? 'Whitefield, Bangalore'
-      : property.id === 'prop_002'
-      ? 'Sarjapur Road, Bangalore'
-      : property.city && property.state
+    property.city && property.state
       ? `${property.city}, ${property.state}`
       : property.address;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Top Left Organic Watercolor Wash + Branch */}
+      {/*-------------------- Top Left Botanical ----------------------*/}
       <View style={styles.topLeftWatercolor} pointerEvents="none">
         <Svg width={180} height={190} viewBox="0 0 180 190">
           <Path
@@ -70,7 +60,7 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
         />
       </View>
 
-      {/* Bottom Left Soft Sage Leaves */}
+      {/*-------------------- Bottom Left Sage Leaves ----------------------*/}
       <View style={styles.bottomLeftContainer} pointerEvents="none">
         <Svg width={180} height={170} viewBox="0 0 180 170">
           <Path
@@ -92,7 +82,7 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
         </Svg>
       </View>
 
-      {/* Bottom Right Forest Green Leaf */}
+      {/*-------------------- Bottom Right Forest Leaf ----------------------*/}
       <View style={styles.bottomRightContainer} pointerEvents="none">
         <Svg width={140} height={150} viewBox="0 0 140 150">
           <Path
@@ -109,7 +99,7 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
         </Svg>
       </View>
 
-      {/* Top Header Bar */}
+      {/*-------------------- Top Header Bar ----------------------*/}
       <View style={styles.headerBar}>
         <TouchableOpacity
           activeOpacity={0.7}
@@ -131,10 +121,11 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
       </View>
 
       <ScrollView
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
-        {/* House Illustration */}
+        {/*-------------------- House Illustration ----------------------*/}
         <View style={styles.illustrationContainer}>
           <Image
             source={require('../../assets/images/confirmation_house.png')}
@@ -149,20 +140,19 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
           back to you soon.
         </Text>
 
-        {/* Unified Card matching Mockup Screen 4 */}
+        {/*-------------------- Summary Card ----------------------*/}
         <View style={styles.unifiedCard}>
           <View style={styles.propertyRow}>
-            <Image
-              source={getPropertyImageSource(property)}
+            <PropertyImage
+              uri={property.imageUrl}
               style={styles.propertyThumbnail}
-              resizeMode="cover"
             />
             <View style={styles.propertyInfo}>
               <Text style={styles.propertyTitle} numberOfLines={1}>
                 {displayTitle}
               </Text>
               <View style={styles.locationRow}>
-                <Icons.Pin size={14} color="#1A1A1A" />
+                <Icons.Pin size={14} color={colors.textSecondary} />
                 <Text style={styles.locationText} numberOfLines={1}>
                   {locationText}
                 </Text>
@@ -173,58 +163,58 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
 
           <View style={styles.cardDivider} />
 
-          {/* Visitor Details Section */}
+          {/*-------------------- Visitor Details Section ----------------------*/}
           <View style={styles.visitorSection}>
             <Text style={styles.visitorSectionTitle}>Visitor Details</Text>
 
             <View style={styles.detailRow}>
               <View style={styles.iconContainer}>
-                <Icons.User size={18} color="#1A1A1A" />
+                <Icons.User size={18} color={colors.primary} />
               </View>
               <Text style={styles.detailText}>
-                {visitor.visitorName || 'Aman Sagar'}
+                {visitor.visitorName}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <View style={styles.iconContainer}>
-                <Icons.Mail size={18} color="#1A1A1A" />
+                <Icons.Mail size={18} color={colors.primary} />
               </View>
               <Text style={styles.detailText}>
-                {visitor.email || 'aman@example.com'}
+                {visitor.email}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <View style={styles.iconContainer}>
-                <Icons.Phone size={18} color="#1A1A1A" />
+                <Icons.Phone size={18} color={colors.primary} />
               </View>
               <Text style={styles.detailText}>
-                {visitor.countryCode || '+91'} {visitor.contactNumber || '98765 43210'}
+                {visitor.countryCode ? `${visitor.countryCode} ` : ''}{visitor.contactNumber}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <View style={styles.iconContainer}>
-                <Icons.Calendar size={18} color="#1A1A1A" />
+                <Icons.Calendar size={18} color={colors.primary} />
               </View>
               <Text style={styles.detailText}>
-                {formatDate(visitor.preferredDate) || '12 Oct 2026'}
+                {formatDate(visitor.preferredDate)}
               </Text>
             </View>
 
             <View style={styles.detailRow}>
               <View style={styles.iconContainer}>
-                <Icons.Clock size={18} color="#1A1A1A" />
+                <Icons.Clock size={18} color={colors.primary} />
               </View>
               <Text style={styles.detailText}>
-                {visitor.preferredTimeSlot || '11:00 AM - 12:00 PM'}
+                {visitor.preferredTimeSlot}
               </Text>
             </View>
           </View>
         </View>
 
-        {/* Disclaimer Box */}
+        {/*-------------------- Disclaimer Box ----------------------*/}
         <View style={styles.disclaimerBox}>
           <Icons.Info size={18} color="#6B7280" />
           <Text style={styles.disclaimerText}>
@@ -232,7 +222,7 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
           </Text>
         </View>
 
-        {/* Action Buttons */}
+        {/*-------------------- Action Buttons ----------------------*/}
         <View style={styles.actionButtons}>
           <TouchableOpacity
             activeOpacity={0.88}
@@ -244,7 +234,7 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
 
           <TouchableOpacity
             activeOpacity={0.88}
-            onPress={handleBackToHome}
+            onPress={handleViewRequests}
             style={styles.secondaryButton}
           >
             <Text style={styles.secondaryButtonText}>View My Requests</Text>
@@ -255,6 +245,7 @@ export const BookingConfirmationScreen: React.FC<BookingConfirmationScreenProps>
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -306,6 +297,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
@@ -314,29 +308,31 @@ const styles = StyleSheet.create({
   illustrationContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 6,
-    marginBottom: 16,
+    marginTop: 2,
+    marginBottom: 8,
   },
   illustrationImage: {
-    width: 290,
-    height: 215,
+    width: 200,
+    height: 150,
   },
   title: {
-    fontFamily: 'serif',
-    fontSize: 27,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontFamily: fontFamilies.heading,
+    fontSize: 25,
+    fontWeight: '600',
+    color: colors.textPrimary,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 6,
     letterSpacing: -0.3,
   },
   subtitle: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14,
-    lineHeight: 21,
-    color: '#6B7280',
+    lineHeight: 20,
+    color: colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 24,
+    paddingHorizontal: 16,
+    marginBottom: 16,
+    fontWeight: '500',
   },
   unifiedCard: {
     backgroundColor: '#FFFFFF',
@@ -349,7 +345,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 10,
     elevation: 3,
-    marginBottom: 20,
+    marginBottom: 14,
   },
   propertyRow: {
     flexDirection: 'row',
@@ -367,10 +363,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   propertyTitle: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 19,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 5,
   },
   locationRow: {
@@ -379,15 +375,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   locationText: {
-    fontSize: 13.5,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
     marginLeft: 6,
   },
   propertyPrice: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   cardDivider: {
     height: 1,
@@ -398,10 +396,10 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   visitorSectionTitle: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 14,
   },
   detailRow: {
@@ -415,8 +413,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   detailText: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14.5,
-    color: '#1A1A1A',
+    color: colors.textPrimary,
     fontWeight: '500',
     flex: 1,
   },
@@ -424,25 +423,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     paddingHorizontal: 4,
-    marginBottom: 24,
+    marginBottom: 14,
   },
   disclaimerText: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.textTertiary,
     marginLeft: 10,
     lineHeight: 18,
     flex: 1,
+    fontWeight: '500',
   },
   actionButtons: {
-    marginBottom: 28,
+    marginBottom: 20,
   },
   primaryButton: {
     backgroundColor: '#264E36',
-    height: 56,
-    borderRadius: 28,
+    height: 54,
+    borderRadius: 27,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
     shadowColor: '#264E36',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.22,
@@ -450,23 +451,25 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   primaryButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 15.5,
+    fontWeight: '600',
     color: '#FFFFFF',
   },
   secondaryButton: {
     backgroundColor: '#F5EFE4',
-    height: 56,
-    borderRadius: 28,
+    height: 54,
+    borderRadius: 27,
     borderWidth: 1.2,
     borderColor: '#4A4A4A',
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryButtonText: {
-    fontSize: 16,
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 15.5,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: colors.textPrimary,
   },
 });
 

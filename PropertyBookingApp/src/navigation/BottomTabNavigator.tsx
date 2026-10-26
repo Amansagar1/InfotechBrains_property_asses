@@ -5,64 +5,54 @@ import { BottomTabParamList } from '../types/navigation';
 import { PropertyListingScreen } from '../screens/listing/PropertyListingScreen';
 import { SavedPropertiesScreen } from '../screens/saved/SavedPropertiesScreen';
 import { VisitsScreen } from '../screens/visits/VisitsScreen';
-import { MessagesScreen } from '../screens/messages/MessagesScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { Icons } from '../components/common/Icons';
+import { colors } from '../theme/colors';
+import { fontFamilies } from '../theme/typography';
 
 const Tab = createBottomTabNavigator<BottomTabParamList>();
 
 const DiscoverTabIcon = ({ focused }: { focused: boolean }) =>
   focused ? (
     <View style={styles.activeIconCircle}>
-      <Icons.Home size={17} color="#FFFFFF" />
+      <Icons.Home size={17} color={colors.textLight} />
     </View>
   ) : (
     <View style={styles.inactiveIconWrapper}>
-      <Icons.Home size={20} color="#6B7280" />
+      <Icons.Home size={20} color={colors.textSecondary} />
     </View>
   );
 
 const SavedTabIcon = ({ focused }: { focused: boolean }) =>
   focused ? (
     <View style={styles.activeIconCircle}>
-      <Icons.Heart size={16} color="#FFFFFF" filled={true} />
+      <Icons.Heart size={16} color={colors.textLight} filled={true} />
     </View>
   ) : (
     <View style={styles.inactiveIconWrapper}>
-      <Icons.Heart size={20} color="#6B7280" filled={false} />
+      <Icons.Heart size={20} color={colors.textSecondary} filled={false} />
     </View>
   );
 
 const VisitsTabIcon = ({ focused }: { focused: boolean }) =>
   focused ? (
     <View style={styles.activeIconCircle}>
-      <Icons.CalendarCheck size={17} color="#FFFFFF" />
+      <Icons.CalendarCheck size={17} color={colors.textLight} />
     </View>
   ) : (
     <View style={styles.inactiveIconWrapper}>
-      <Icons.CalendarCheck size={19} color="#6B7280" />
-    </View>
-  );
-
-const MessagesTabIcon = ({ focused }: { focused: boolean }) =>
-  focused ? (
-    <View style={styles.activeIconCircle}>
-      <Icons.MessageDots size={17} color="#FFFFFF" />
-    </View>
-  ) : (
-    <View style={styles.inactiveIconWrapper}>
-      <Icons.MessageDots size={19} color="#6B7280" />
+      <Icons.CalendarCheck size={19} color={colors.textSecondary} />
     </View>
   );
 
 const ProfileTabIcon = ({ focused }: { focused: boolean }) =>
   focused ? (
     <View style={styles.activeIconCircle}>
-      <Icons.User size={17} color="#FFFFFF" />
+      <Icons.User size={16} color={colors.textLight} />
     </View>
   ) : (
     <View style={styles.inactiveIconWrapper}>
-      <Icons.User size={20} color="#6B7280" />
+      <Icons.User size={19} color={colors.textSecondary} />
     </View>
   );
 
@@ -76,8 +66,8 @@ export const BottomTabNavigator: React.FC = () => {
         tabBarItemStyle: styles.tabBarItem,
         tabBarIconStyle: styles.tabBarIcon,
         tabBarLabelStyle: styles.tabLabel,
-        tabBarActiveTintColor: '#0F4A3E',
-        tabBarInactiveTintColor: '#6B7280',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarActiveBackgroundColor: 'transparent',
         tabBarInactiveBackgroundColor: 'transparent',
       }}
@@ -110,17 +100,8 @@ export const BottomTabNavigator: React.FC = () => {
       />
 
       <Tab.Screen
-        name="Messages"
-        component={MessagesScreen}
-        options={{
-          tabBarLabel: 'Messages',
-          tabBarIcon: MessagesTabIcon,
-        }}
-      />
-
-      <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileScreen as any}
         options={{
           tabBarLabel: 'Profile',
           tabBarIcon: ProfileTabIcon,
@@ -161,7 +142,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#0F4A3E',
+    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -172,8 +153,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabLabel: {
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 12.5,
-    fontWeight: '500',
+    fontWeight: '600',
     marginTop: 3,
     marginBottom: 0,
     paddingTop: 0,

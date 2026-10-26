@@ -9,9 +9,12 @@ export const APP_CONFIG = {
 
 export const PROPERTY_CATEGORIES = [
   'All',
-  'Villa',
+  'Single Family',
+  'Condo',
+  'Townhome',
   'Apartment',
-  'Independent House',
+  'Multi Family',
+  'Land',
 ] as const;
 
 export const TIME_SLOTS = [

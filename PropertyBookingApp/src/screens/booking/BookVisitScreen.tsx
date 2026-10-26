@@ -17,6 +17,9 @@ import { PropertySummaryCard } from '../../components/property/PropertySummaryCa
 import { BookingForm } from '../../components/booking/BookingForm';
 import { Icons } from '../../components/common/Icons';
 import { resolveImageUrl } from '../../utils/imageHelper';
+import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
+import { useApp } from '../../context/AppContext';
 
 export type BookVisitScreenProps = RootStackScreenProps<'BookVisit'>;
 
@@ -35,9 +38,17 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
     submit,
   } = useBookingForm(property);
 
+  const { addBookedVisit, updateUserProfile } = useApp();
+
   const handleSubmit = async () => {
     const confirmation = await submit();
     if (confirmation) {
+      addBookedVisit(confirmation);
+      updateUserProfile({
+        name: confirmation.visitor.visitorName,
+        email: confirmation.visitor.email,
+        phone: `${confirmation.visitor.countryCode ? confirmation.visitor.countryCode + ' ' : ''}${confirmation.visitor.contactNumber}`,
+      });
       navigation.navigate('BookingConfirmation', { confirmation });
     }
   };
@@ -53,12 +64,12 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
     beds: property.beds,
     baths: property.baths,
     sqft: property.sqft,
-    imageUrl: resolveImageUrl(property.photos?.[0]?.url),
+    imageUrl: property.photos?.[0]?.url,
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Top Left Organic Watercolor Tint */}
+      {/*-------------------- Top Left Watercolor Tint ----------------------*/}
       <View style={styles.topLeftWatercolor} pointerEvents="none">
         <Svg width={180} height={180} viewBox="0 0 180 180">
           <Path
@@ -69,7 +80,7 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
         </Svg>
       </View>
 
-      {/* Top Right Botanical Branch + Organic Blob */}
+      {/*-------------------- Top Right Botanical Branch ----------------------*/}
       <View style={styles.topRightBotanicalContainer} pointerEvents="none">
         <Svg width={190} height={200} viewBox="0 0 190 200" style={styles.blobSvg}>
           <Path
@@ -85,22 +96,19 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
         />
       </View>
 
-      {/* Bottom Left Soft Sage Leaves */}
+      {/*-------------------- Bottom Left Sage Leaves ----------------------*/}
       <View style={styles.bottomLeftContainer} pointerEvents="none">
         <Svg width={180} height={170} viewBox="0 0 180 170">
-          {/* Outer soft wash */}
           <Path
             d="M 0,170 C 0,120 20,70 50,40 C 45,70 70,120 140,170 Z"
             fill="#CAD6BA"
             opacity={0.4}
           />
-          {/* Inner sage leaf contour */}
           <Path
             d="M 0,170 C 0,110 15,60 38,15 C 35,50 55,110 105,170 Z"
             fill="#98A783"
             opacity={0.82}
           />
-          {/* Vein lines */}
           <Path
             d="M 0,165 Q 25,90 38,15"
             stroke="#7C8D67"
@@ -122,23 +130,20 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
         </Svg>
       </View>
 
-      {/* Bottom Right Deep Forest Green Leaf */}
+      {/*-------------------- Bottom Right Forest Green Leaf ----------------------*/}
       <View style={styles.bottomRightContainer} pointerEvents="none">
         <Svg width={150} height={160} viewBox="0 0 150 160">
-          {/* Dark forest green leaf */}
           <Path
             d="M 150,15 C 95,35 45,75 22,160 L 150,160 Z"
             fill="#18301F"
             opacity={0.95}
           />
-          {/* Center vein */}
           <Path
             d="M 150,15 Q 85,75 22,160"
             stroke="#355D42"
             strokeWidth="1.6"
             fill="none"
           />
-          {/* Side veins */}
           <Path
             d="M 105,55 Q 125,44 145,46"
             stroke="#355D42"
@@ -170,7 +175,7 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
         style={styles.keyboardView}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Header Bar */}
+        {/*-------------------- Header Bar ----------------------*/}
         <View style={styles.headerBar}>
           <TouchableOpacity
             activeOpacity={0.7}
@@ -178,7 +183,7 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
             style={styles.backButton}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
           >
-            <Icons.ArrowLeft size={22} color="#1A1A1A" />
+            <Icons.ArrowLeft size={22} color={colors.textPrimary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Book a Visit</Text>
         </View>
@@ -203,6 +208,7 @@ export const BookVisitScreen: React.FC<BookVisitScreenProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -271,10 +277,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
     letterSpacing: -0.3,
   },
   scrollContent: {

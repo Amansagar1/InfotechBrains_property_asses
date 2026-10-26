@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,38 +11,171 @@ import {
   Platform,
   Alert,
   Image,
+  RefreshControl,
+  Linking,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VisitsScreenProps } from '../../types/navigation';
-import { INITIAL_VISITS } from '../../constants/visits';
 import { ScheduledVisit } from '../../types/visit';
 import { VisitCard } from '../../components/visit/VisitCard';
 import { Icons } from '../../components/common/Icons';
 import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 import { TIME_SLOTS } from '../../constants/config';
+import { useApp } from '../../context/AppContext';
+import { getPropertyListings } from '../../services/api/propertyApi';
+import { formatPrice } from '../../utils/formatters';
 
 type FilterTab = 'all' | 'upcoming' | 'past';
 
 const RESCHEDULE_DATES = [
-  { label: 'Tomorrow', day: '16', month: 'OCT' },
-  { label: 'Sat', day: '17', month: 'OCT' },
-  { label: 'Sun', day: '18', month: 'OCT' },
-  { label: 'Mon', day: '19', month: 'OCT' },
-  { label: 'Tue', day: '20', month: 'OCT' },
+  { label: 'Tomorrow', day: '28', month: 'OCT' },
+  { label: 'Sat', day: '31', month: 'OCT' },
+  { label: 'Sun', day: '01', month: 'NOV' },
+  { label: 'Mon', day: '02', month: 'NOV' },
+  { label: 'Tue', day: '03', month: 'NOV' },
 ];
 
 export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
-  const [visits, setVisits] = useState<ScheduledVisit[]>(INITIAL_VISITS);
+  const { bookedVisits, cancelVisit, rescheduleVisit: appRescheduleVisit } = useApp();
+  const [apiVisits, setApiVisits] = useState<ScheduledVisit[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+
+  const visits = useMemo(() => {
+    return [...bookedVisits, ...apiVisits];
+  }, [bookedVisits, apiVisits]);
   const [activeTab, setActiveTab] = useState<FilterTab>('all');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // More options state
   const [selectedVisitForOptions, setSelectedVisitForOptions] = useState<ScheduledVisit | null>(null);
-
-  // Reschedule state
   const [rescheduleVisit, setRescheduleVisit] = useState<ScheduledVisit | null>(null);
   const [selectedDateItem, setSelectedDateItem] = useState(RESCHEDULE_DATES[0]);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>(TIME_SLOTS[0]);
+
+  const fetchApiVisits = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    try {
+      console.log('📡 [VISITS API] Fetching properties dynamically from real estate API...');
+      const response = await getPropertyListings(1, 4);
+      const properties = response.data || [];
+      if (properties.length > 0) {
+        const dynamicVisits: ScheduledVisit[] = [
+          {
+            id: `api_visit_${properties[0].id}`,
+            bookingReference: `BK-${properties[0].id.slice(0, 6).toUpperCase()}-101`,
+            property: properties[0],
+            title: properties[0].address ? properties[0].address.split(',')[0] : 'Downtown Residence',
+            location:
+              properties[0].city && properties[0].state
+                ? `${properties[0].city}, ${properties[0].state}`
+                : properties[0].address,
+            priceDisplay: formatPrice(properties[0].price, properties[0].currency || 'USD'),
+            beds: properties[0].beds,
+            baths: properties[0].baths,
+            sqftDisplay: `${properties[0].sqft} sqft`,
+            day: '28',
+            month: 'OCT',
+            year: '2026',
+            timeSlot: '10:00 AM - 11:00 AM',
+            status: 'upcoming',
+            localImage: null,
+            agent: {
+              id: properties[0].agent?.id || 'agent_01',
+              name: properties[0].agent?.name || 'Sarah Mitchell',
+              phone: properties[0].agent?.phone || '+1-555-0142',
+              email: properties[0].agent?.email || 'sarah.m@realty.com',
+              role: 'Listing Agent',
+            },
+            meetingLocation: properties[0].address,
+            createdAt: new Date().toISOString(),
+          },
+          ...(properties.length > 1
+            ? [
+                {
+                  id: `api_visit_${properties[1].id}`,
+                  bookingReference: `BK-${properties[1].id.slice(0, 6).toUpperCase()}-102`,
+                  property: properties[1],
+                  title: properties[1].address ? properties[1].address.split(',')[0] : 'Coastal Retreat',
+                  location:
+                    properties[1].city && properties[1].state
+                      ? `${properties[1].city}, ${properties[1].state}`
+                      : properties[1].address,
+                  priceDisplay: formatPrice(properties[1].price, properties[1].currency || 'USD'),
+                  beds: properties[1].beds,
+                  baths: properties[1].baths,
+                  sqftDisplay: `${properties[1].sqft} sqft`,
+                  day: '02',
+                  month: 'NOV',
+                  year: '2026',
+                  timeSlot: '02:00 PM - 03:00 PM',
+                  status: 'upcoming' as const,
+                  localImage: null,
+                  agent: {
+                    id: properties[1].agent?.id || 'agent_02',
+                    name: properties[1].agent?.name || 'Marcus Vance',
+                    phone: properties[1].agent?.phone || '+1-555-0189',
+                    email: properties[1].agent?.email || 'marcus.v@realty.com',
+                    role: 'Senior Advisor',
+                  },
+                  meetingLocation: properties[1].address,
+                  createdAt: new Date().toISOString(),
+                },
+              ]
+            : []),
+          ...(properties.length > 2
+            ? [
+                {
+                  id: `api_visit_${properties[2].id}`,
+                  bookingReference: `BK-${properties[2].id.slice(0, 6).toUpperCase()}-103`,
+                  property: properties[2],
+                  title: properties[2].address ? properties[2].address.split(',')[0] : 'Penthouse Suite',
+                  location:
+                    properties[2].city && properties[2].state
+                      ? `${properties[2].city}, ${properties[2].state}`
+                      : properties[2].address,
+                  priceDisplay: formatPrice(properties[2].price, properties[2].currency || 'USD'),
+                  beds: properties[2].beds,
+                  baths: properties[2].baths,
+                  sqftDisplay: `${properties[2].sqft} sqft`,
+                  day: '14',
+                  month: 'OCT',
+                  year: '2026',
+                  timeSlot: '11:30 AM - 12:30 PM',
+                  status: 'completed' as const,
+                  localImage: null,
+                  agent: {
+                    id: properties[2].agent?.id || 'agent_03',
+                    name: properties[2].agent?.name || 'Elena Rostova',
+                    phone: properties[2].agent?.phone || '+1-555-0199',
+                    email: properties[2].agent?.email || 'elena.r@realty.com',
+                    role: 'Associate Partner',
+                  },
+                  meetingLocation: properties[2].address,
+                  createdAt: new Date().toISOString(),
+                },
+              ]
+            : []),
+        ];
+        console.log(`✅ [VISITS API] Loaded ${dynamicVisits.length} dynamic property visits from API.`);
+        setApiVisits(dynamicVisits);
+      }
+    } catch (err: any) {
+      console.warn('VisitsScreen API fetch error:', err?.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchApiVisits();
+  }, [fetchApiVisits]);
 
   useEffect(() => {
     StatusBar.setBarStyle('dark-content');
@@ -75,24 +208,38 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
   const totalCount = visits.length;
 
   const handlePressDetails = (visit: ScheduledVisit) => {
-    navigation.navigate('PropertyDetails', {
+    console.log('👆 [VISITS SCREEN] handlePressDetails tapped for property:', visit.property?.id);
+    (navigation as any).navigate('PropertyDetails', {
       propertyId: visit.property.id,
       initialProperty: visit.property,
     });
   };
 
   const handleOpenMoreOptions = (visit: ScheduledVisit) => {
+    console.log('👆 [VISITS SCREEN] handleOpenMoreOptions tapped for visit:', visit.id);
     setSelectedVisitForOptions(visit);
   };
 
   const handleCallAgent = (visit: ScheduledVisit) => {
     setSelectedVisitForOptions(null);
-    showToast(`Calling ${visit.agent.name} (${visit.agent.phone})...`);
+    if (visit.agent?.phone) {
+      Linking.openURL(`tel:${visit.agent.phone}`).catch(() => {
+        showToast(`Calling ${visit.agent.name} (${visit.agent.phone})...`);
+      });
+    } else {
+      showToast(`Calling ${visit.agent.name}...`);
+    }
   };
 
   const handleMessageAgent = (visit: ScheduledVisit) => {
     setSelectedVisitForOptions(null);
-    showToast(`Opening chat with ${visit.agent.name}...`);
+    if (visit.agent?.email) {
+      Linking.openURL(`mailto:${visit.agent.email}?subject=Tour Inquiry: ${visit.title}`).catch(() => {
+        showToast(`Opening chat with ${visit.agent.name}...`);
+      });
+    } else {
+      showToast(`Opening chat with ${visit.agent.name}...`);
+    }
   };
 
   const handleOpenReschedule = (visit: ScheduledVisit) => {
@@ -105,7 +252,14 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
   const handleConfirmReschedule = () => {
     if (!rescheduleVisit) return;
 
-    setVisits(prev =>
+    appRescheduleVisit(
+      rescheduleVisit.id,
+      selectedDateItem.day,
+      selectedDateItem.month,
+      selectedTimeSlot
+    );
+
+    setApiVisits(prev =>
       prev.map(v => {
         if (v.id === rescheduleVisit.id) {
           return {
@@ -113,7 +267,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
             day: selectedDateItem.day,
             month: selectedDateItem.month,
             timeSlot: selectedTimeSlot,
-            status: 'upcoming',
+            status: 'upcoming' as const,
           };
         }
         return v;
@@ -135,7 +289,8 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
           text: 'Cancel Tour',
           style: 'destructive',
           onPress: () => {
-            setVisits(prev => prev.filter(v => v.id !== visit.id));
+            cancelVisit(visit.id);
+            setApiVisits(prev => prev.filter(v => v.id !== visit.id));
             showToast(`Cancelled tour for ${visit.title}`);
           },
         },
@@ -145,7 +300,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      {/* Title & Subtitle */}
+      {/*-------------------- Title & Subtitle ----------------------*/}
       <View style={styles.titleSection}>
         <Text style={styles.mainTitle}>My Visits</Text>
         <Text style={styles.subtitle}>
@@ -153,7 +308,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* Segmented Filter Bar: All (3) | Upcoming (2) | Past (1) */}
+      {/*-------------------- Filter Segment Bar ----------------------*/}
       <View style={styles.segmentedContainer}>
         <TouchableOpacity
           activeOpacity={0.8}
@@ -212,34 +367,44 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
     </View>
   );
 
-  const renderEmptyState = () => (
-    <View style={styles.emptyContainer}>
-      <View style={styles.emptyIconCircle}>
-        <Icons.CalendarCheck size={36} color="#0F4A3E" />
+  const renderEmptyState = () => {
+    if (loading && visits.length === 0) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0F4A3E" />
+          <Text style={styles.loadingText}>Loading dynamic property visits...</Text>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.emptyContainer}>
+        <View style={styles.emptyIconCircle}>
+          <Icons.CalendarCheck size={36} color="#0F4A3E" />
+        </View>
+        <Text style={styles.emptyTitle}>
+          {activeTab === 'upcoming' ? 'No Upcoming Visits' : 'No Visits Found'}
+        </Text>
+        <Text style={styles.emptySubtitle}>
+          {activeTab === 'upcoming'
+            ? 'Browse curated properties and schedule a free guided tour at your convenience.'
+            : 'You do not have any past visits recorded yet.'}
+        </Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={styles.discoverButton}
+          onPress={() => navigation.navigate('Discover')}
+        >
+          <Text style={styles.discoverButtonText}>Explore Available Homes</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.emptyTitle}>
-        {activeTab === 'upcoming' ? 'No Upcoming Visits' : 'No Visits Found'}
-      </Text>
-      <Text style={styles.emptySubtitle}>
-        {activeTab === 'upcoming'
-          ? 'Browse curated properties and schedule a free guided tour at your convenience.'
-          : 'You do not have any past visits recorded yet.'}
-      </Text>
-      <TouchableOpacity
-        activeOpacity={0.85}
-        style={styles.discoverButton}
-        onPress={() => navigation.navigate('Discover')}
-      >
-        <Text style={styles.discoverButtonText}>Explore Available Homes</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Decorative Botanical Elements Matching Screenshot */}
+      {/*-------------------- Decorative Botanicals ----------------------*/}
       <Image
         source={require('../../assets/images/details_botanical_clean.png')}
         style={styles.topRightBotanical}
@@ -251,14 +416,14 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
         resizeMode="contain"
       />
 
-      {/* Toast Notification */}
+      {/*-------------------- Toast Notification ----------------------*/}
       {toastMessage && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
 
-      {/* Visits List */}
+      {/*-------------------- Visits List ----------------------*/}
       <FlatList
         data={filteredVisits}
         keyExtractor={item => item.id}
@@ -273,9 +438,17 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
         ListEmptyComponent={renderEmptyState}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchApiVisits(true)}
+            colors={['#0F4A3E']}
+            tintColor="#0F4A3E"
+          />
+        }
       />
 
-      {/* More Options Action Sheet Modal */}
+      {/*-------------------- More Options Action Sheet Modal ----------------------*/}
       <Modal
         visible={!!selectedVisitForOptions}
         transparent
@@ -296,7 +469,6 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                       Tour on {selectedVisitForOptions.month} {selectedVisitForOptions.day}, {selectedVisitForOptions.year} • {selectedVisitForOptions.timeSlot}
                     </Text>
 
-                    {/* Agent Call Button */}
                     <TouchableOpacity
                       activeOpacity={0.75}
                       style={styles.optionRow}
@@ -306,12 +478,15 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                         <Icons.Phone size={18} color="#0F4A3E" />
                       </View>
                       <View style={styles.optionTextWrapper}>
-                        <Text style={styles.optionTitle}>Call Agent ({selectedVisitForOptions.agent.name})</Text>
-                        <Text style={styles.optionSubtitle}>{selectedVisitForOptions.agent.phone}</Text>
+                        <Text style={styles.optionTitle}>
+                          Call Agent ({selectedVisitForOptions.agent?.name || 'Property Advisor'})
+                        </Text>
+                        <Text style={styles.optionSubtitle}>
+                          {selectedVisitForOptions.agent?.phone || 'Available for phone inquiries'}
+                        </Text>
                       </View>
                     </TouchableOpacity>
 
-                    {/* Agent Message Button */}
                     <TouchableOpacity
                       activeOpacity={0.75}
                       style={styles.optionRow}
@@ -326,7 +501,6 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                       </View>
                     </TouchableOpacity>
 
-                    {/* Reschedule Button */}
                     <TouchableOpacity
                       activeOpacity={0.75}
                       style={styles.optionRow}
@@ -341,7 +515,6 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                       </View>
                     </TouchableOpacity>
 
-                    {/* Cancel Tour Button */}
                     <TouchableOpacity
                       activeOpacity={0.75}
                       style={[styles.optionRow, styles.optionRowDanger]}
@@ -363,7 +536,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
         </TouchableWithoutFeedback>
       </Modal>
 
-      {/* Reschedule Modal */}
+      {/*-------------------- Reschedule Modal ----------------------*/}
       <Modal
         visible={!!rescheduleVisit}
         transparent
@@ -380,7 +553,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                   Choose your new preferred date and time slot:
                 </Text>
 
-                {/* Date Selection Pills */}
+                {/*-------------------- Date Selection ----------------------*/}
                 <Text style={styles.sectionLabel}>Select Date</Text>
                 <View style={styles.datesGrid}>
                   {RESCHEDULE_DATES.map(item => {
@@ -416,7 +589,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                   })}
                 </View>
 
-                {/* Time Slots Selection */}
+                {/*-------------------- Time Slots ----------------------*/}
                 <Text style={styles.sectionLabel}>Select Time Slot</Text>
                 <View style={styles.timeSlotsGrid}>
                   {TIME_SLOTS.slice(0, 4).map(slot => {
@@ -444,7 +617,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
                   })}
                 </View>
 
-                {/* Action Buttons */}
+                {/*-------------------- Action Buttons ----------------------*/}
                 <View style={styles.modalActionsRow}>
                   <TouchableOpacity
                     activeOpacity={0.7}
@@ -473,6 +646,7 @@ export const VisitsScreen: React.FC<VisitsScreenProps> = ({ navigation }) => {
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -514,16 +688,17 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.heading,
     fontSize: 34,
     lineHeight: 40,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     letterSpacing: -0.4,
   },
   subtitle: {
-    fontFamily: fontFamilies.body,
-    fontSize: 14.5,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
     lineHeight: 21,
-    color: '#6B7280',
+    color: colors.textSecondary,
     marginTop: 4,
+    fontWeight: '500',
   },
   segmentedContainer: {
     flexDirection: 'row',
@@ -548,16 +723,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   segmentTabActive: {
-    backgroundColor: '#1E3E2F',
+    backgroundColor: colors.primary,
   },
   segmentText: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#374151',
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 13.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   segmentTextActive: {
     color: '#FFFFFF',
     fontWeight: '600',
+  },
+  loadingContainer: {
+    paddingVertical: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
+    color: colors.textSecondary,
+    fontWeight: '500',
+    marginTop: 12,
   },
   emptyContainer: {
     paddingVertical: 60,
@@ -575,28 +763,30 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyTitle: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontFamily: fontFamilies.body,
-    fontSize: 14,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14.5,
+    color: colors.textSecondary,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 21,
     marginBottom: 24,
+    fontWeight: '500',
   },
   discoverButton: {
-    backgroundColor: '#0F4A3E',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
   },
   discoverButtonText: {
-    color: '#FFFFFF',
+    color: colors.textLight,
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -644,14 +834,16 @@ const styles = StyleSheet.create({
   modalSheetTitle: {
     fontFamily: fontFamilies.heading,
     fontSize: 20,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   modalSheetSubtitle: {
-    fontSize: 13,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13.5,
+    color: colors.textSecondary,
     marginBottom: 18,
+    fontWeight: '500',
   },
   optionRow: {
     flexDirection: 'row',
@@ -680,24 +872,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   optionTitle: {
-    fontSize: 14.5,
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textPrimary,
   },
   optionSubtitle: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 12.5,
+    color: colors.textSecondary,
     marginTop: 1,
+    fontWeight: '500',
   },
   optionTitleDanger: {
-    fontSize: 14.5,
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 15,
     fontWeight: '600',
     color: '#DC2626',
   },
   sectionLabel: {
-    fontSize: 12.5,
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 13,
     fontWeight: '600',
-    color: '#374151',
+    color: colors.textPrimary,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     marginBottom: 10,
@@ -713,31 +910,34 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 4,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderWidth: 1.5,
+    borderColor: '#D4D0C8',
     backgroundColor: '#FAF9F6',
     alignItems: 'center',
   },
   datePillActive: {
-    backgroundColor: '#1E3E2F',
-    borderColor: '#1E3E2F',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   datePillLabel: {
-    fontSize: 10.5,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 11,
     fontWeight: '500',
-    color: '#6B7280',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   datePillLabelActive: {
-    color: '#E5E7EB',
+    color: colors.textLight,
   },
   datePillValue: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#111827',
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   datePillValueActive: {
-    color: '#FFFFFF',
+    color: colors.textLight,
+    fontWeight: '600',
   },
   timeSlotsGrid: {
     flexDirection: 'row',
@@ -749,21 +949,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 9,
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderWidth: 1.5,
+    borderColor: '#D4D0C8',
     backgroundColor: '#FAF9F6',
   },
   timeSlotPillActive: {
-    backgroundColor: '#1E3E2F',
-    borderColor: '#1E3E2F',
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   timeSlotText: {
-    fontSize: 12.5,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13,
     fontWeight: '500',
-    color: '#374151',
+    color: colors.textPrimary,
   },
   timeSlotTextActive: {
-    color: '#FFFFFF',
+    fontFamily: fontFamilies.bodySemiBold,
+    color: colors.textLight,
     fontWeight: '600',
   },
   modalActionsRow: {

@@ -5,14 +5,21 @@ import { validateBookingForm } from '../utils/validators';
 import { submitVisitBooking } from '../services/api/propertyApi';
 import { COUNTRY_CODES } from '../constants/config';
 
+const getTomorrowDate = () => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+};
+
 export const useBookingForm = (property: Property) => {
   const [formData, setFormData] = useState<BookingFormData>({
     visitorName: '',
     email: '',
     contactNumber: '',
     countryCode: COUNTRY_CODES[0].value,
-    preferredDate: '',
-    preferredTimeSlot: '',
+    preferredDate: getTomorrowDate(),
+    preferredTimeSlot: '10:00 AM - 11:00 AM',
   });
 
   const [errors, setErrors] = useState<BookingFormErrors>({});

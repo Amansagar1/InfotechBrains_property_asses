@@ -8,7 +8,6 @@ export type BottomTabParamList = {
   Discover: undefined;
   Saved: undefined;
   Visits: undefined;
-  Messages: undefined;
   Profile: undefined;
 };
 
@@ -24,6 +23,7 @@ export type RootStackParamList = {
   BookingConfirmation: {
     confirmation: BookingConfirmation;
   };
+  Profile: undefined;
 };
 
 export type RootStackScreenProps<T extends keyof RootStackParamList> = NativeStackScreenProps<
@@ -48,16 +48,6 @@ export type SavedScreenProps = CompositeScreenProps<
 
 export type VisitsScreenProps = CompositeScreenProps<
   BottomTabScreenProps<BottomTabParamList, 'Visits'>,
-  NativeStackScreenProps<RootStackParamList>
->;
-
-export type MessagesScreenProps = CompositeScreenProps<
-  BottomTabScreenProps<BottomTabParamList, 'Messages'>,
-  NativeStackScreenProps<RootStackParamList>
->;
-
-export type ProfileScreenProps = CompositeScreenProps<
-  BottomTabScreenProps<BottomTabParamList, 'Profile'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 

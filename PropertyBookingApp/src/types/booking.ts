@@ -9,6 +9,8 @@ export interface BookingFormData {
 
 export type BookingFormErrors = Partial<Record<keyof BookingFormData, string>>;
 
+import { Agent } from './property';
+
 export interface PropertySummary {
   id: string;
   address: string;
@@ -21,6 +23,7 @@ export interface PropertySummary {
   baths?: number;
   sqft?: number;
   imageUrl?: string;
+  agent?: Agent;
 }
 
 export interface BookingConfirmation {

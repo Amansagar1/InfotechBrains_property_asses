@@ -9,7 +9,9 @@ import {
 } from 'react-native';
 import { ScheduledVisit } from '../../types/visit';
 import { Icons } from '../common/Icons';
+import { PropertyImage } from '../common/PropertyImage';
 import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 
 export interface VisitCardProps {
   visit: ScheduledVisit;
@@ -25,23 +27,19 @@ export const VisitCard: React.FC<VisitCardProps> = ({
   style,
 }) => {
   const isUpcoming = visit.status === 'upcoming';
+  const imageUrl = visit.property?.photos?.[0]?.url || (visit as any).imageUrl || '';
 
   return (
     <View style={[styles.card, style]}>
-      {/* Upper Main Row: Thumbnail + Details + Date Badge */}
       <View style={styles.topRow}>
-        {/* Left Property Thumbnail */}
         <TouchableOpacity activeOpacity={0.9} onPress={onPressDetails}>
-          <Image
-            source={visit.localImage}
+          <PropertyImage
+            uri={imageUrl}
             style={styles.propertyThumb}
-            resizeMode="cover"
           />
         </TouchableOpacity>
 
-        {/* Middle Info Column */}
         <View style={styles.middleColumn}>
-          {/* Status Badge */}
           <View
             style={[
               styles.statusBadge,
@@ -58,22 +56,19 @@ export const VisitCard: React.FC<VisitCardProps> = ({
             </Text>
           </View>
 
-          {/* Title */}
           <TouchableOpacity activeOpacity={0.8} onPress={onPressDetails}>
             <Text style={styles.title} numberOfLines={1}>
               {visit.title}
             </Text>
           </TouchableOpacity>
 
-          {/* Location */}
           <View style={styles.locationRow}>
-            <Icons.Pin size={12} color="#4B5563" />
+            <Icons.Pin size={14} color={colors.textSecondary} />
             <Text style={styles.locationText} numberOfLines={1}>
               {visit.location}
             </Text>
           </View>
 
-          {/* Price */}
           <View style={styles.priceRow}>
             <Text style={styles.priceText}>{visit.priceDisplay}</Text>
             {visit.priceSuffix && (
@@ -81,26 +76,24 @@ export const VisitCard: React.FC<VisitCardProps> = ({
             )}
           </View>
 
-          {/* Specs */}
           <View style={styles.specsRow}>
             <View style={styles.specItem}>
-              <Icons.Bed size={13} color="#4B5563" />
+              <Icons.Bed size={15} color={colors.textSecondary} />
               <Text style={styles.specText}>{visit.beds} Beds</Text>
             </View>
 
             <View style={styles.specItem}>
-              <Icons.Bath size={13} color="#4B5563" />
+              <Icons.Bath size={15} color={colors.textSecondary} />
               <Text style={styles.specText}>{visit.baths} Baths</Text>
             </View>
 
             <View style={styles.specItem}>
-              <Icons.ExpandSquare size={11} color="#4B5563" />
+              <Icons.ExpandSquare size={13} color={colors.textSecondary} />
               <Text style={styles.specText}>{visit.sqftDisplay}</Text>
             </View>
           </View>
         </View>
 
-        {/* Right Date Badge */}
         <View style={styles.dateBadge}>
           <Text style={styles.dateDay}>{visit.day}</Text>
           <Text style={styles.dateMonth}>{visit.month}</Text>
@@ -108,9 +101,7 @@ export const VisitCard: React.FC<VisitCardProps> = ({
         </View>
       </View>
 
-      {/* Bottom Action Row: Time Slot + View Details + More Options */}
       <View style={styles.bottomRow}>
-        {/* Time Slot Pill */}
         <View style={styles.timePill}>
           <Icons.Clock size={13} color="#111827" />
           <Text style={styles.timeText} numberOfLines={1}>
@@ -118,7 +109,6 @@ export const VisitCard: React.FC<VisitCardProps> = ({
           </Text>
         </View>
 
-        {/* View Details Button */}
         <TouchableOpacity
           activeOpacity={0.85}
           onPress={onPressDetails}
@@ -128,12 +118,11 @@ export const VisitCard: React.FC<VisitCardProps> = ({
           <Icons.ArrowRight size={13} color="#111827" />
         </TouchableOpacity>
 
-        {/* More Options Button */}
         <TouchableOpacity
           activeOpacity={0.75}
           onPress={onPressMore}
           style={styles.moreButton}
-          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+          hitSlop={{ top: 14, bottom: 14, left: 14, right: 14 }}
         >
           <Icons.MoreVertical size={16} color="#111827" />
         </TouchableOpacity>
@@ -142,6 +131,7 @@ export const VisitCard: React.FC<VisitCardProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
@@ -196,10 +186,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fontFamilies.heading,
-    fontSize: 17,
+    fontSize: 18,
     lineHeight: 22,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   locationRow: {
@@ -208,8 +198,10 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   locationText: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13.5,
+    color: colors.textSecondary,
+    fontWeight: '500',
     marginLeft: 4,
     flex: 1,
   },
@@ -222,13 +214,15 @@ const styles = StyleSheet.create({
     fontFamily: fontFamilies.heading,
     fontSize: 17,
     lineHeight: 22,
-    fontWeight: '700',
-    color: '#0A4D3C',
+    fontWeight: '600',
+    color: colors.primary,
   },
   priceSuffixText: {
-    fontSize: 12,
-    color: '#6B7280',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13,
+    color: colors.textSecondary,
     marginLeft: 2,
+    fontWeight: '500',
   },
   specsRow: {
     flexDirection: 'row',
@@ -241,9 +235,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   specText: {
-    fontSize: 11,
-    color: '#4B5563',
-    marginLeft: 3,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 12.5,
+    color: colors.textSecondary,
+    marginLeft: 4,
     fontWeight: '500',
   },
   dateBadge: {
@@ -258,21 +253,24 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   dateDay: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 18,
     lineHeight: 22,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   dateMonth: {
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 10,
-    fontWeight: '700',
-    color: '#6B7280',
+    fontWeight: '600',
+    color: colors.textSecondary,
     letterSpacing: 0.5,
   },
   dateYear: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 9.5,
-    color: '#9CA3AF',
+    fontWeight: '500',
+    color: colors.textTertiary,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -293,13 +291,14 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   timeText: {
-    fontSize: 12,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 12.5,
     fontWeight: '500',
-    color: '#111827',
+    color: colors.textPrimary,
   },
   detailsButton: {
-    borderWidth: 1,
-    borderColor: '#111827',
+    borderWidth: 1.2,
+    borderColor: '#000000',
     borderRadius: 20,
     paddingHorizontal: 13,
     paddingVertical: 8,
@@ -309,9 +308,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   detailsButtonText: {
-    fontSize: 12,
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 12.5,
     fontWeight: '600',
-    color: '#111827',
+    color: colors.textPrimary,
   },
   moreButton: {
     width: 36,

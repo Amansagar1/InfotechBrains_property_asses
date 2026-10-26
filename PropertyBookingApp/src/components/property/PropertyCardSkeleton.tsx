@@ -29,32 +29,23 @@ export const PropertyCardSkeleton: React.FC = () => {
 
   return (
     <View style={[styles.card, shadows.card]}>
-      {/* Image Skeleton */}
       <View style={styles.imageContainer}>
         <Animated.View style={[styles.imagePlaceholder, { opacity: pulseAnim }]} />
-
-        {/* Property Type Badge Placeholder */}
         <Animated.View style={[styles.typeBadgePlaceholder, { opacity: pulseAnim }]} />
-
-        {/* Favorite Button Placeholder */}
         <Animated.View style={[styles.favoritePlaceholder, { opacity: pulseAnim }]} />
       </View>
 
-      {/* Info Container */}
       <View style={styles.infoContainer}>
-        {/* Title and Price */}
         <View style={styles.titlePriceRow}>
           <Animated.View style={[styles.titlePlaceholder, { opacity: pulseAnim }]} />
           <Animated.View style={[styles.pricePlaceholder, { opacity: pulseAnim }]} />
         </View>
 
-        {/* Location Row */}
         <View style={styles.locationRow}>
           <Animated.View style={[styles.locationIconPlaceholder, { opacity: pulseAnim }]} />
           <Animated.View style={[styles.locationTextPlaceholder, { opacity: pulseAnim }]} />
         </View>
 
-        {/* Specs and Action Row */}
         <View style={styles.specsRow}>
           <View style={styles.specsGroup}>
             <Animated.View style={[styles.specPillPlaceholder, { opacity: pulseAnim }]} />
@@ -62,7 +53,6 @@ export const PropertyCardSkeleton: React.FC = () => {
             <Animated.View style={[styles.specPillPlaceholder, { opacity: pulseAnim }]} />
           </View>
 
-          {/* Forward Arrow Circle Placeholder */}
           <Animated.View style={[styles.actionButtonPlaceholder, { opacity: pulseAnim }]} />
         </View>
       </View>
@@ -70,6 +60,7 @@ export const PropertyCardSkeleton: React.FC = () => {
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',

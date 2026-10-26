@@ -210,6 +210,13 @@ export const Icons = {
     </Svg>
   ),
 
+  CheckCircle: ({ size = 20, color = colors.textSecondary }: IconProps) => (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="10" stroke={color} strokeWidth="1.8" />
+      <Path d="M8 12L11 15L16 9" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  ),
+
   Close: ({ size = 20, color = colors.textPrimary }: IconProps) => (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <Path d="M6 18L18 6M6 6L18 18" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

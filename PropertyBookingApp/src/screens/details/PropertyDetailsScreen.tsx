@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   StatusBar,
   Platform,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RootStackScreenProps } from '../../types/navigation';
@@ -20,9 +21,10 @@ import { LoadingIndicator } from '../../components/common/LoadingIndicator';
 import { ErrorState } from '../../components/common/ErrorState';
 import { Icons } from '../../components/common/Icons';
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { typography, fontFamilies } from '../../theme/typography';
 import { spacing, borderRadius } from '../../theme/spacing';
 import { formatPrice } from '../../utils/formatters';
+import { useApp } from '../../context/AppContext';
 
 export type PropertyDetailsScreenProps = RootStackScreenProps<'PropertyDetails'>;
 
@@ -30,6 +32,7 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
   route,
   navigation,
 }) => {
+  //-------------------- State & Hooks ----------------------
   const { propertyId, initialProperty } = route.params;
   const { property, photos, loading, error, retry } = usePropertyDetails(
     propertyId,
@@ -37,7 +40,8 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
   );
 
   const [isExpandedDescription, setIsExpandedDescription] = useState<boolean>(false);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const { isSaved, toggleSave } = useApp();
+  const isFavorite = property ? isSaved(property.id) : false;
 
   useEffect(() => {
     StatusBar.setBarStyle('light-content');
@@ -47,6 +51,7 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
     }
   }, []);
 
+  //-------------------- Loading & Error States ----------------------
   if (loading && !property) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -79,46 +84,40 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
     );
   }
 
+  //-------------------- Handlers ----------------------
   const handleBookVisitPress = () => {
     navigation.navigate('BookVisit', { property });
   };
 
-  const displayTitle =
-    property.id === 'prop_001'
-      ? 'Maplewood Villa'
-      : property.id === 'prop_002'
-      ? 'Serene Heights'
-      : property.address.split(',')[0] || 'Modern Villa';
-
-  const displayPrice =
-    property.id === 'prop_001'
-      ? '₹ 2.4 Cr'
-      : property.id === 'prop_002'
-      ? '₹ 1.35 Cr'
-      : formatPrice(property.price, property.currency);
-
-  const displayLocation =
-    property.id === 'prop_001'
-      ? 'Whitefield, Bangalore'
-      : property.id === 'prop_002'
-      ? 'Sarjapur Road, Bangalore'
-      : property.city && property.state
-      ? `${property.city}, ${property.state}`
-      : property.address;
-
+  const displayTitle = property.address ? property.address.split(',')[0] : 'Property Details';
+  const displayPrice = formatPrice(property.price, property.currency || 'USD');
+  const displayLocation = property.address;
   const displayDescription =
-    property.id === 'prop_001'
-      ? 'A modern villa with spacious interiors, lush green surroundings and a perfect blend of comfort and elegance. Ideal for families seeking a premium lifestyle.'
-      : property.description ||
-        'A modern luxury residence with spacious interiors, lush green surroundings and a perfect blend of comfort and elegance. Ideal for families seeking a premium lifestyle.';
+    property.description ||
+    `${property.property_type ? property.property_type.replace(/_/g, ' ') : 'Property'} located at ${property.address}.`;
+
+  const handleSharePress = async () => {
+    if (!property) return;
+    try {
+      const shareUrl = photos.length > 0 ? photos[0].url : (property as any).featured_photo;
+      await Share.share(
+        {
+          title: displayTitle,
+          message: `Explore this stunning property: ${displayTitle}\n\n📍 Location: ${displayLocation}\n💰 Price: ${displayPrice}\n🏠 Type: ${(property.property_type || 'Property').replace(/_/g, ' ')}\n🛏️ Beds: ${property.beds} | 🛁 Baths: ${property.baths} | 📐 SqFt: ${property.sqft || 'Spacious'}\n\n${displayDescription}${shareUrl ? `\n\nPhoto: ${shareUrl}` : ''}`,
+        },
+        {
+          dialogTitle: `Share ${displayTitle}`,
+        }
+      );
+    } catch {}
+  };
 
   const amenitiesList =
-    property.id === 'prop_001'
-      ? ['Garden', 'Parking', 'Security', 'Club House']
-      : property.features && property.features.length > 0
+    property.features && property.features.length > 0
       ? property.features
-      : ['Garden', 'Parking', 'Security', 'Club House'];
+      : [];
 
+  //-------------------- Render ----------------------
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -131,8 +130,10 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
           property={property}
           photos={photos}
           onBackPress={() => navigation.goBack()}
-          onFavoritePress={() => setIsFavorite(prev => !prev)}
-          onSharePress={() => {}}
+          onFavoritePress={() => {
+            if (property) toggleSave(property);
+          }}
+          onSharePress={handleSharePress}
           isFavorite={isFavorite}
         />
 
@@ -164,25 +165,45 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
               {displayDescription}
             </Text>
 
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => setIsExpandedDescription(prev => !prev)}
-              style={styles.readMoreButton}
-            >
-              <Text style={styles.readMoreText}>
-                {isExpandedDescription ? 'Read less ↑' : 'Read more →'}
-              </Text>
-            </TouchableOpacity>
+            {displayDescription.length > 120 && (
+              <TouchableOpacity
+                activeOpacity={0.7}
+                onPress={() => setIsExpandedDescription(prev => !prev)}
+                style={styles.readMoreButton}
+              >
+                <Text style={styles.readMoreText}>
+                  {isExpandedDescription ? 'Read less ↑' : 'Read more →'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Amenities</Text>
-            <View style={styles.amenitiesGrid}>
-              {amenitiesList.map((amenity, index) => (
-                <AmenityItem key={`${amenity}-${index}`} name={amenity} />
-              ))}
+          {amenitiesList.length > 0 && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Amenities</Text>
+              <View style={styles.amenitiesGrid}>
+                {amenitiesList.map((amenity, index) => (
+                  <AmenityItem key={`${amenity}-${index}`} name={amenity} />
+                ))}
+              </View>
             </View>
-          </View>
+          )}
+
+          {property.agent ? (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Listing Agent</Text>
+              <View style={styles.agentCard}>
+                <View style={styles.agentAvatar}>
+                  <Icons.User size={22} color="#0F4A3E" />
+                </View>
+                <View style={styles.agentInfo}>
+                  <Text style={styles.agentName}>{property.agent.name}</Text>
+                  <Text style={styles.agentDetail}>{property.agent.email}</Text>
+                  <Text style={styles.agentDetail}>{property.agent.phone}</Text>
+                </View>
+              </View>
+            </View>
+          ) : null}
         </View>
       </ScrollView>
 
@@ -205,6 +226,7 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -229,18 +251,18 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   title: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 26,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
     flex: 1,
     marginRight: spacing.md,
   },
   price: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   locationRow: {
     flexDirection: 'row',
@@ -248,24 +270,28 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   locationText: {
-    fontSize: 14,
-    color: '#777B75',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textSecondary,
     marginLeft: 6,
   },
   section: {
     marginVertical: spacing.md,
   },
   sectionTitle: {
-    fontFamily: 'serif',
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontFamily: fontFamilies.heading,
+    fontSize: 21,
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: spacing.sm,
   },
   descriptionText: {
-    ...typography.body,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15.5,
     color: colors.textSecondary,
-    lineHeight: 22,
+    lineHeight: 24,
+    fontWeight: '500',
   },
   readMoreButton: {
     marginTop: spacing.xs,
@@ -314,5 +340,41 @@ const styles = StyleSheet.create({
     backgroundColor: '#EFE8DE',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  agentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#ECEAE4',
+    marginTop: 6,
+  },
+  agentAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EFECE6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+  agentInfo: {
+    flex: 1,
+  },
+  agentName: {
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: 2,
+  },
+  agentDetail: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 14,
+    color: colors.textSecondary,
+    lineHeight: 20,
+    fontWeight: '500',
   },
 });

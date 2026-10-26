@@ -1,85 +1,77 @@
 import { Photo } from '../types/property';
+import { APP_CONFIG } from '../constants/config';
 
-export const SAVED_IMAGES = {
-  maplewood: require('../assets/images/saved_maplewood.jpg'),
-  serene: require('../assets/images/saved_serene.jpg'),
-  willow: require('../assets/images/saved_willow.jpg'),
+//-------------------- Curated Architectural Photography ----------------------
+const CURATED_EXTERIORS = [
+  'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&auto=format&fit=crop&q=80',
+  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=900&auto=format&fit=crop&q=80',
+];
+
+const ROOM_PHOTOS: Record<string, string> = {
+  living: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=900&auto=format&fit=crop&q=80',
+  kitchen: 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=900&auto=format&fit=crop&q=80',
+  bedroom: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=900&auto=format&fit=crop&q=80',
+  backyard: 'https://images.unsplash.com/photo-1584738766473-61c083514bf4?w=900&auto=format&fit=crop&q=80',
 };
 
-export const CURATED_PROPERTY_IMAGES = [
-  SAVED_IMAGES.maplewood,
-  SAVED_IMAGES.serene,
-  SAVED_IMAGES.willow,
-  { uri: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop' },
-  { uri: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=1200&auto=format&fit=crop' },
-];
+const getHash = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+};
 
+//-------------------- Image Resolution Helpers ----------------------
+export const resolveImageUrl = (
+  url?: string,
+  propertyType?: string,
+  propertyId?: string
+): string => {
+  if (!url) return '';
 
-const GALLERY_FALLBACK_URLS = [
-  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1200&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1200&auto=format&fit=crop',
-];
-
-export const resolveImageUrl = (url?: string, identifier?: string | number): string => {
-  if (url && (url.startsWith('http://') || url.startsWith('https://')) && !url.includes('.svg')) {
+  if (
+    (url.startsWith('http://') || url.startsWith('https://')) &&
+    !url.includes('placeholder.svg')
+  ) {
     return url;
   }
 
-  const num = typeof identifier === 'string'
-    ? parseInt(identifier.replace(/\D/g, ''), 10) || 0
-    : typeof identifier === 'number'
-    ? identifier
-    : 0;
+  if (url.includes('placeholder.svg') || url.endsWith('.svg')) {
+    const lowerUrl = url.toLowerCase();
 
-  return GALLERY_FALLBACK_URLS[num % GALLERY_FALLBACK_URLS.length];
+    if (lowerUrl.includes('living')) return ROOM_PHOTOS.living;
+    if (lowerUrl.includes('kitchen')) return ROOM_PHOTOS.kitchen;
+    if (lowerUrl.includes('bedroom')) return ROOM_PHOTOS.bedroom;
+    if (lowerUrl.includes('backyard') || lowerUrl.includes('garden')) return ROOM_PHOTOS.backyard;
+
+    const listingMatch = url.match(/listing=([^&]+)/);
+    const seed = listingMatch ? listingMatch[1] : propertyId || propertyType || url;
+    const index = getHash(seed) % CURATED_EXTERIORS.length;
+    return CURATED_EXTERIORS[index];
+  }
+
+  return `${APP_CONFIG.BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-export const getPropertyImageSource = (
+export const getPropertyPhotos = (
   property?: { id?: string; photos?: Photo[] } | null,
-  photoIndex: number = 0
-) => {
-  if (!property) {
-    return CURATED_PROPERTY_IMAGES[0];
+  photos?: Photo[]
+): Photo[] => {
+  if (photos && photos.length > 0) {
+    return photos;
   }
-
-  const id = property.id || '';
-  const num = parseInt(id.replace(/\D/g, ''), 10) || 1;
-  const imageIndex = (num - 1 + photoIndex) % CURATED_PROPERTY_IMAGES.length;
-
-  return CURATED_PROPERTY_IMAGES[imageIndex];
-};
-
-export const getPropertyPhotoGallery = (
-  property?: { id?: string; photos?: Photo[] } | null
-): any[] => {
-  if (!property) {
-    return [CURATED_PROPERTY_IMAGES[0], ...GALLERY_FALLBACK_URLS.slice(1, 8)];
+  if (property?.photos && property.photos.length > 0) {
+    return property.photos;
   }
-
-  const id = property.id || '';
-  const num = parseInt(id.replace(/\D/g, ''), 10) || 1;
-  const mainImage = CURATED_PROPERTY_IMAGES[(num - 1) % CURATED_PROPERTY_IMAGES.length];
-
-  return [
-    mainImage,
-    { uri: GALLERY_FALLBACK_URLS[1] },
-    { uri: GALLERY_FALLBACK_URLS[2] },
-    { uri: GALLERY_FALLBACK_URLS[3] },
-    { uri: GALLERY_FALLBACK_URLS[4] },
-    { uri: GALLERY_FALLBACK_URLS[5] },
-    { uri: GALLERY_FALLBACK_URLS[6] },
-    { uri: GALLERY_FALLBACK_URLS[7] },
-  ];
+  return [];
 };

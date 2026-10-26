@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { colors } from '../../theme/colors';
+import { fontFamilies } from '../../theme/typography';
 import { Icons } from './Icons';
 
 export interface FormFieldProps extends TextInputProps {
@@ -41,7 +42,6 @@ export const FormField: React.FC<FormFieldProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {/* Floating Outline Label Badge */}
       <View style={styles.floatingLabelBadge} pointerEvents="none">
         <Text style={styles.label}>
           {label} {required && <Text style={styles.requiredStar}>*</Text>}
@@ -71,13 +71,24 @@ export const FormField: React.FC<FormFieldProps> = ({
           </TouchableOpacity>
         )}
 
-        <TextInput
-          placeholderTextColor="#A5A199"
-          editable={!isFieldPressable}
-          style={[styles.input, style]}
-          pointerEvents={isFieldPressable ? 'none' : 'auto'}
-          {...inputProps}
-        />
+        {isFieldPressable ? (
+          <Text
+            numberOfLines={1}
+            style={[
+              styles.input,
+              !inputProps.value ? styles.placeholderText : null,
+              style,
+            ]}
+          >
+            {inputProps.value || inputProps.placeholder}
+          </Text>
+        ) : (
+          <TextInput
+            placeholderTextColor="#444444"
+            style={[styles.input, style]}
+            {...inputProps}
+          />
+        )}
 
         {rightIcon && <View style={styles.rightIconContainer}>{rightIcon}</View>}
       </InputWrapper>
@@ -87,6 +98,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   container: {
     marginBottom: 20,
@@ -101,14 +113,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 6,
   },
   label: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#6E6B65',
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 12.5,
+    fontWeight: '600',
+    color: colors.textPrimary,
     letterSpacing: 0.2,
   },
   requiredStar: {
     color: '#C4704F',
-    fontWeight: '700',
+    fontWeight: '600',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -140,9 +153,10 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   prefixText: {
-    fontSize: 14.5,
-    fontWeight: '600',
-    color: '#1A1A1A',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textPrimary,
     marginRight: 5,
   },
   prefixDivider: {
@@ -154,11 +168,18 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 14.5,
-    color: '#1A1A1A',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.textPrimary,
     paddingVertical: 0,
   },
+  placeholderText: {
+    color: colors.textTertiary,
+    fontWeight: '500',
+  },
   errorText: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 12,
     color: colors.errorText,
     marginTop: 4,

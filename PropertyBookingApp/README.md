@@ -6,36 +6,38 @@ A React Native CLI mobile application built with TypeScript, featuring real prop
 
 ## 📱 Features
 
-- **Discover & Listing Feed**:
-  - Live data fetching from REST APIs with pagination and pull-to-refresh.
+- **Discover & Listing Feed (Screen 1)**:
+  - 100% live data fetching from `GET https://fakeapifordevs.vercel.app/api/realestate/listings?page=1&per_page=10` with pagination and pull-to-refresh.
   - Search by property location, city, and property type.
-  - Horizontal category filtering (*All, Villa, Apartment, Single Family, Condo, Townhouse*).
-  - Elegant property cards displaying thumbnails, category badges, pricing, address, bed/bath/sqft specs, and favorite toggles.
-  - Comprehensive states: loading indicators, network error handling with retry, and empty search results.
+  - Category filtering matching actual API property types (*All, Single Family, Condo, Townhome, Apartment, Multi Family, Land*).
+  - Dynamic property cards displaying SVG thumbnails from the API, type badges, price with currency ($/USD), address, bed/bath/sqft specs, and favorite toggles.
+  - Comprehensive states: loading indicators, network error handling with retry CTA, and empty search results.
 
-- **Property Details & Gallery**:
-  - Paged photo gallery with index counter badge (`1/8`).
+- **Property Details & Gallery (Screen 2)**:
+  - Selected property details fetched from `GET /api/realestate/listings/{id}` and high-res photos from `GET /api/realestate/listings/{id}/photos`.
+  - Paged photo gallery with index counter badge (`1/5`) and live captions from the API (*"Front exterior"*, *"Living room"*, etc.).
   - Top action controls: back navigation, favorite heart toggle, and share action.
-  - Spec grid highlighting beds, baths, sqft, and property type in rounded metric cards.
-  - Expandable property description (*"Read more →"* / *"Read less ↑"*).
-  - Amenities grid with icon badges (*Garden, Parking, Security, Club House*).
-  - Sticky bottom action bar with *"Book a Visit →"* call-to-action and direct chat/inquiry button.
+  - Spec grid highlighting beds, baths, sqft, and property type directly from the API.
+  - Full property description from the API with expandable text (*"Read more →"* / *"Read less ↑"*).
+  - Real amenities grid mapped directly from the property's `features` array (*garage, fireplace, balcony, solar_panels*, etc.).
+  - Listing Agent card displaying agent name, email, and phone from `property.agent`.
+  - Sticky bottom action bar with *"Book a Visit →"* call-to-action.
 
-- **Book a Visit (Simulated Scheduling)**:
-  - Mini summary card of the selected property.
+- **Book a Visit (Screen 3)**:
+  - Selected API property summary card (title, location, price, and thumbnail).
   - Complete scheduling form:
     - **Visitor Full Name** (required, min 2 chars)
     - **Email Address** (required, strict email regex validation)
     - **Contact Number** with country code selector (default `+91`, supports `+1`, `+44`, etc.)
-    - **Preferred Visit Date** with past-date prevention and quick date selection chips (*Tomorrow*, *In 2 Days*, *Next Week*)
-    - **Preferred Time Slot** selector dropdown (*09:00 AM - 10:00 AM*, *11:00 AM - 12:00 PM*, etc.)
+    - **Preferred Visit Date** with past-date prevention and quick date selection chips (*Today*, *Tomorrow*, *In 2 Days*, *Next Week*)
+    - **Preferred Time Slot** selector dropdown (*10:00 AM - 11:00 AM*, *11:30 AM - 12:30 PM*, etc.)
   - Real-time inline field validation and duplicate submission prevention (`isSubmitting` lock).
 
-- **Booking Confirmation**:
-  - Status hero checkmark badge and congratulations banner.
-  - Confirmed property summary card.
+- **Booking Confirmation (Screen 4)**:
+  - Status hero illustration and confirmation header.
+  - Selected API property summary card.
   - Visitor details breakdown card with name, email, phone, date, and time slot.
-  - Explicit frontend-only simulation disclaimer notice.
+  - Note: *"This is a simulated booking request. No actual appointment has been reserved yet."* as specified by the PDF.
   - Navigation actions: *"Back to Home"* and *"View My Requests"*.
 
 ---
@@ -198,11 +200,11 @@ npm run ios
 
 ## 💡 Assumptions & Edge Cases Handled
 
-1. **Relative Image URLs**:
-   The API returns paths like `/placeholder.svg?height=600&width=900...`. The `resolveImageUrl` helper automatically prepends `https://fakeapifordevs.vercel.app` or provides curated real estate photography fallbacks if the endpoint is unavailable.
-2. **Missing Amenities / Features**:
-   If a property's `features` array is empty or undefined, sensible fallback amenities (*Garden, Parking, Security, Club House*) are rendered to keep the layout complete.
-3. **Simulated Booking Latency**:
-   The booking submission simulates a realistic network request with a 1.2-second delay and creates an immutable confirmation record with a unique booking ID.
-4. **Duplicate Submission Prevention**:
-   The `useBookingForm` hook maintains an `isSubmitting` lock that disables the CTA and prevents rapid double-taps from submitting redundant requests.
+1. **Relative Image & SVG URLs**:
+   The fakeapifordevs API returns relative SVG image URLs (e.g. `/placeholder.svg?height=600&width=900...`). The `PropertyImage` component detects `.svg` extensions and renders them with `react-native-svg`'s `<SvgUri>`, automatically prefixing `https://fakeapifordevs.vercel.app`.
+2. **100% Dynamic Data**:
+   All listing cards, detailed descriptions, photo galleries, captions, amenities, and listing agent contact details are fetched dynamically using the endpoints in the assignment PDF without hardcoding mock property data.
+3. **Frontend-Only Simulated Booking**:
+   As required by Section 4 (Screen 4) of the assignment PDF, visit booking is simulated on the frontend with a 1.2-second network feedback delay and displays an explicit note indicating no actual appointment was reserved.
+4. **Form Validation & Duplicate Prevention**:
+   The form verifies required fields, validates RFC 5322-compliant email formats, verifies contact numbers, and checks for past dates. The `useBookingForm` hook maintains an `isSubmitting` lock that disables the button during in-flight submissions to prevent duplicate requests.

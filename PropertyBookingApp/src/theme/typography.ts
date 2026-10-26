@@ -2,24 +2,39 @@ import { Platform, TextStyle } from 'react-native';
 
 export const fontFamilies = {
   heading: Platform.select({
-    ios: 'Georgia',
-    android: 'serif',
-    default: 'serif',
+    ios: 'Fraunces',
+    android: 'Fraunces-SemiBold',
+    default: 'Fraunces-SemiBold',
+  }),
+  headingSemiBold: Platform.select({
+    ios: 'Fraunces',
+    android: 'Fraunces-SemiBold',
+    default: 'Fraunces-SemiBold',
+  }),
+  headingBold: Platform.select({
+    ios: 'Fraunces',
+    android: 'Fraunces-Bold',
+    default: 'Fraunces-Bold',
   }),
   body: Platform.select({
-    ios: 'System',
-    android: 'sans-serif',
-    default: 'sans-serif',
+    ios: 'Outfit',
+    android: 'Outfit-Medium',
+    default: 'Outfit-Medium',
   }),
   bodyMedium: Platform.select({
-    ios: 'System',
-    android: 'sans-serif-medium',
-    default: 'sans-serif-medium',
+    ios: 'Outfit-Medium',
+    android: 'Outfit-Medium',
+    default: 'Outfit-Medium',
   }),
   bodySemiBold: Platform.select({
-    ios: 'System',
-    android: 'sans-serif-medium',
-    default: 'sans-serif-medium',
+    ios: 'Outfit-SemiBold',
+    android: 'Outfit-SemiBold',
+    default: 'Outfit-SemiBold',
+  }),
+  bodyBold: Platform.select({
+    ios: 'Outfit-Bold',
+    android: 'Outfit-Bold',
+    default: 'Outfit-Bold',
   }),
 };
 
@@ -28,13 +43,13 @@ export const typography = {
     fontFamily: fontFamilies.heading,
     fontSize: 28,
     lineHeight: 36,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontWeight: '600' as TextStyle['fontWeight'],
   },
   h2: {
     fontFamily: fontFamilies.heading,
     fontSize: 22,
     lineHeight: 28,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontWeight: '600' as TextStyle['fontWeight'],
   },
   h3: {
     fontFamily: fontFamilies.heading,
@@ -43,10 +58,10 @@ export const typography = {
     fontWeight: '600' as TextStyle['fontWeight'],
   },
   subtitle: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '400' as TextStyle['fontWeight'],
+    fontWeight: '500' as TextStyle['fontWeight'],
   },
   labelUpper: {
     fontFamily: fontFamilies.bodySemiBold,
@@ -57,34 +72,34 @@ export const typography = {
     fontWeight: '600' as TextStyle['fontWeight'],
   },
   bodyLarge: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 16,
     lineHeight: 22,
-    fontWeight: '400' as TextStyle['fontWeight'],
+    fontWeight: '500' as TextStyle['fontWeight'],
   },
   body: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '400' as TextStyle['fontWeight'],
+    fontWeight: '500' as TextStyle['fontWeight'],
   },
   bodySmall: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 12,
     lineHeight: 16,
-    fontWeight: '400' as TextStyle['fontWeight'],
+    fontWeight: '500' as TextStyle['fontWeight'],
   },
   priceLarge: {
     fontFamily: fontFamilies.heading,
     fontSize: 22,
     lineHeight: 26,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontWeight: '600' as TextStyle['fontWeight'],
   },
   priceCard: {
     fontFamily: fontFamilies.heading,
     fontSize: 18,
     lineHeight: 22,
-    fontWeight: '700' as TextStyle['fontWeight'],
+    fontWeight: '600' as TextStyle['fontWeight'],
   },
   button: {
     fontFamily: fontFamilies.bodySemiBold,
@@ -93,10 +108,10 @@ export const typography = {
     fontWeight: '600' as TextStyle['fontWeight'],
   },
   badge: {
-    fontFamily: fontFamilies.bodyMedium,
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 12,
     lineHeight: 16,
-    fontWeight: '500' as TextStyle['fontWeight'],
+    fontWeight: '600' as TextStyle['fontWeight'],
   },
 };
 

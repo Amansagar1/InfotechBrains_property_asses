@@ -2,17 +2,19 @@ import React from 'react';
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
 } from 'react-native';
-import { SavedPropertyItem } from '../../constants/savedProperties';
+import { Property } from '../../types/property';
 import { Icons } from '../common/Icons';
+import { PropertyImage } from '../common/PropertyImage';
+import { formatPrice, formatBeds, formatBaths, formatSqft, formatPropertyType } from '../../utils/formatters';
 import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 
 export interface SavedPropertyCardProps {
-  property: SavedPropertyItem;
+  property: Property;
   isSaved?: boolean;
   onPress: () => void;
   onToggleSave: () => void;
@@ -26,7 +28,14 @@ export const SavedPropertyCard: React.FC<SavedPropertyCardProps> = ({
   onToggleSave,
   style,
 }) => {
-  const isForSale = property.listingType === 'For Sale';
+  const isForSale = property.type === 'sale';
+  const displayTitle = property.address ? property.address.split(',')[0] : 'Property';
+  const displayPrice = formatPrice(property.price, property.currency || 'USD');
+  const displayLocation =
+    property.city && property.state
+      ? `${property.city}, ${property.state}`
+      : property.address;
+  const displayType = formatPropertyType(property.property_type);
 
   return (
     <TouchableOpacity
@@ -34,15 +43,13 @@ export const SavedPropertyCard: React.FC<SavedPropertyCardProps> = ({
       onPress={onPress}
       style={[styles.card, style]}
     >
-      {/* Property Image Container */}
       <View style={styles.imageContainer}>
-        <Image
-          source={property.localImage}
+        <PropertyImage
+          uri={property.photos?.[0]?.url}
           style={styles.image}
-          resizeMode="cover"
+          propertyType={displayType}
         />
 
-        {/* Top Left Badge: For Sale / For Rent */}
         <View
           style={[
             styles.badgePill,
@@ -55,11 +62,10 @@ export const SavedPropertyCard: React.FC<SavedPropertyCardProps> = ({
               isForSale ? styles.badgeTextForSale : styles.badgeTextForRent,
             ]}
           >
-            {property.listingType}
+            {isForSale ? 'For Sale' : 'For Rent'}
           </Text>
         </View>
 
-        {/* Top Right Floating White Circle with Dark Green Heart */}
         <TouchableOpacity
           activeOpacity={0.8}
           onPress={onToggleSave}
@@ -74,46 +80,42 @@ export const SavedPropertyCard: React.FC<SavedPropertyCardProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Property Information */}
       <View style={styles.infoContainer}>
-        {/* Row 1: Title and Price */}
         <View style={styles.titlePriceRow}>
           <Text style={styles.title} numberOfLines={1}>
-            {property.title}
+            {displayTitle}
           </Text>
-          <Text style={styles.price}>{property.priceDisplay}</Text>
+          <Text style={styles.price}>{displayPrice}</Text>
         </View>
 
-        {/* Row 2: Location with Pin Icon */}
         <View style={styles.locationRow}>
-          <Icons.Pin size={14} color="#6B7280" />
+          <Icons.Pin size={16} color={colors.textSecondary} />
           <Text style={styles.locationText} numberOfLines={1}>
-            {property.locationDisplay}
+            {displayLocation}
           </Text>
         </View>
 
-        {/* Row 3: Specs (Beds, Baths, Sqft, Pipe Divider, Property Type) */}
         <View style={styles.specsRow}>
           <View style={styles.specItem}>
-            <Icons.Bed size={16} color="#4B5563" />
-            <Text style={styles.specText}>{property.beds} Beds</Text>
+            <Icons.Bed size={16} color={colors.textSecondary} />
+            <Text style={styles.specText}>{formatBeds(property.beds)}</Text>
           </View>
 
           <View style={styles.specItem}>
-            <Icons.Bath size={16} color="#4B5563" />
-            <Text style={styles.specText}>{property.baths} Baths</Text>
+            <Icons.Bath size={16} color={colors.textSecondary} />
+            <Text style={styles.specText}>{formatBaths(property.baths)}</Text>
           </View>
 
           <View style={styles.specItem}>
-            <Icons.ExpandSquare size={14} color="#4B5563" />
-            <Text style={styles.specText}>{property.sqftDisplay}</Text>
+            <Icons.ExpandSquare size={14} color={colors.textSecondary} />
+            <Text style={styles.specText}>{formatSqft(property.sqft)}</Text>
           </View>
 
           <View style={styles.pipeDivider} />
 
           <View style={styles.specItem}>
-            <Icons.Home size={15} color="#4B5563" />
-            <Text style={styles.specText}>{property.propertyTypeDisplay}</Text>
+            <Icons.Home size={15} color={colors.textSecondary} />
+            <Text style={styles.specText}>{displayType}</Text>
           </View>
         </View>
       </View>
@@ -121,6 +123,7 @@ export const SavedPropertyCard: React.FC<SavedPropertyCardProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#FFFFFF',
@@ -199,19 +202,19 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: fontFamilies.heading,
-    fontSize: 21,
-    lineHeight: 26,
-    fontWeight: '700',
-    color: '#111827',
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: '600',
+    color: colors.textPrimary,
     flex: 1,
     marginRight: 8,
   },
   price: {
     fontFamily: fontFamilies.heading,
-    fontSize: 21,
-    lineHeight: 26,
-    fontWeight: '700',
-    color: '#0A4D3C',
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: '600',
+    color: colors.primary,
   },
   locationRow: {
     flexDirection: 'row',
@@ -219,9 +222,11 @@ const styles = StyleSheet.create({
     marginBottom: 13,
   },
   locationText: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 5,
+    color: colors.textSecondary,
+    fontWeight: '500',
+    marginLeft: 6,
     flex: 1,
   },
   specsRow: {
@@ -235,9 +240,10 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   specText: {
-    fontSize: 13,
-    color: '#374151',
-    marginLeft: 5,
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 13.5,
+    color: colors.textSecondary,
+    marginLeft: 6,
     fontWeight: '500',
   },
   pipeDivider: {

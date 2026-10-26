@@ -6,10 +6,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   ViewStyle,
+  Platform,
 } from 'react-native';
 import { Property } from '../../types/property';
 import { colors } from '../../theme/colors';
-import { typography } from '../../theme/typography';
+import { typography, fontFamilies } from '../../theme/typography';
 import { borderRadius, spacing } from '../../theme/spacing';
 import { shadows } from '../../theme/shadows';
 import {
@@ -19,8 +20,9 @@ import {
   formatSqft,
   formatPropertyType,
 } from '../../utils/formatters';
-import { getPropertyImageSource } from '../../utils/imageHelper';
+import { PropertyImage } from '../common/PropertyImage';
 import { Icons } from '../common/Icons';
+import { useApp } from '../../context/AppContext';
 
 export interface PropertyCardProps {
   property: Property;
@@ -33,96 +35,49 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onPress,
   style,
 }) => {
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
+  const { isSaved, toggleSave } = useApp();
+  const isFavorite = isSaved(property.id);
 
-  const displayTitle =
-    property.id === 'prop_001'
-      ? 'Maplewood Villa'
-      : property.id === 'prop_002'
-      ? 'Serene Heights'
-      : property.id === 'prop_003'
-      ? 'Willow Creek Residence'
-      : property.address.split(',')[0] || 'Modern Residence';
-
-  const displayPrice =
-    property.id === 'prop_001'
-      ? '₹ 2.4 Cr'
-      : property.id === 'prop_002'
-      ? '₹ 1.35 Cr'
-      : property.id === 'prop_003'
-      ? '₹ 85 Lakh'
-      : formatPrice(property.price, property.currency);
-
+  const displayTitle = property.address ? property.address.split(',')[0] : 'Property';
+  const displayPrice = formatPrice(property.price, property.currency || 'USD');
   const displayLocation =
-    property.id === 'prop_001'
-      ? 'Whitefield, Bangalore'
-      : property.id === 'prop_002'
-      ? 'Sarjapur Road, Bangalore'
-      : property.id === 'prop_003'
-      ? 'Hennur Main Road, Bangalore'
-      : property.city && property.state
+    property.city && property.state
       ? `${property.city}, ${property.state}`
       : property.address;
-
-  const displayType =
-    property.id === 'prop_001'
-      ? 'Villa'
-      : property.id === 'prop_002'
-      ? 'Apartment'
-      : property.id === 'prop_003'
-      ? 'Independent House'
-      : formatPropertyType(property.property_type);
-
-  const displayBeds =
-    property.id === 'prop_001'
-      ? '4 Beds'
-      : property.id === 'prop_002'
-      ? '3 Beds'
-      : property.id === 'prop_003'
-      ? '2 Beds'
-      : formatBeds(property.beds);
-
-  const displayBaths =
-    property.id === 'prop_001'
-      ? '3 Baths'
-      : property.id === 'prop_002'
-      ? '2 Baths'
-      : property.id === 'prop_003'
-      ? '2 Baths'
-      : formatBaths(property.baths);
-
-  const displaySqft =
-    property.id === 'prop_001'
-      ? '2,400 sqft'
-      : property.id === 'prop_002'
-      ? '1,600 sqft'
-      : property.id === 'prop_003'
-      ? '1,250 sqft'
-      : formatSqft(property.sqft);
+  const displayType = formatPropertyType(property.property_type);
+  const displayBeds = formatBeds(property.beds);
+  const displayBaths = formatBaths(property.baths);
+  const displaySqft = formatSqft(property.sqft);
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.92}
-      onPress={onPress}
-      style={[styles.card, shadows.card, style]}
-    >
+    <View style={[styles.card, shadows.card, style]}>
       <View style={styles.imageContainer}>
-        <Image
-          source={getPropertyImageSource(property)}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <TouchableOpacity
+          activeOpacity={0.92}
+          onPress={onPress}
+          style={styles.imageTouchable}
+          accessibilityLabel={`View details for ${displayTitle}`}
+        >
+          <PropertyImage
+            uri={property.photos?.[0]?.url}
+            style={styles.image}
+            propertyType={displayType}
+          />
 
-        <View style={styles.tagOverlay}>
-          <View style={styles.typePill}>
-            <Text style={styles.typePillText}>{displayType}</Text>
+          <View style={styles.tagOverlay}>
+            <View style={styles.typePill}>
+              <Text style={styles.typePillText}>{displayType}</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setIsFavorite(prev => !prev)}
+          activeOpacity={0.75}
+          onPress={() => toggleSave(property)}
           style={styles.favoriteButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel={isFavorite ? 'Remove from saved' : 'Save property'}
         >
           <Icons.Heart
             size={18}
@@ -132,7 +87,11 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </TouchableOpacity>
       </View>
 
-      <View style={styles.infoContainer}>
+      <TouchableOpacity
+        activeOpacity={0.92}
+        onPress={onPress}
+        style={styles.infoContainer}
+      >
         <View style={styles.titlePriceRow}>
           <Text style={styles.title} numberOfLines={1}>
             {displayTitle}
@@ -141,7 +100,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </View>
 
         <View style={styles.locationRow}>
-          <Icons.Pin size={14} color={colors.textSecondary} />
+          <Icons.Pin size={16} color={colors.textSecondary} />
           <Text style={styles.locationText} numberOfLines={1}>
             {displayLocation}
           </Text>
@@ -150,31 +109,27 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <View style={styles.specsRow}>
           <View style={styles.specsGroup}>
             <View style={styles.specItem}>
-              <Icons.Bed size={16} color={colors.textSecondary} />
+              <Icons.Bed size={17} color={colors.textSecondary} />
               <Text style={styles.specText}>{displayBeds}</Text>
             </View>
 
             <View style={styles.specItem}>
-              <Icons.Bath size={16} color={colors.textSecondary} />
+              <Icons.Bath size={17} color={colors.textSecondary} />
               <Text style={styles.specText}>{displayBaths}</Text>
             </View>
 
             <View style={styles.specItem}>
-              <Icons.Sqft size={16} color={colors.textSecondary} />
+              <Icons.Sqft size={17} color={colors.textSecondary} />
               <Text style={styles.specText}>{displaySqft}</Text>
             </View>
           </View>
 
-          <TouchableOpacity
-            activeOpacity={0.85}
-            onPress={onPress}
-            style={styles.arrowButton}
-          >
-            <Icons.ArrowRight size={16} color={colors.textLight} />
-          </TouchableOpacity>
+          <View style={styles.arrowButton}>
+            <Icons.ArrowRight size={17} color="#FFFFFF" />
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -192,6 +147,10 @@ const styles = StyleSheet.create({
     width: '100%',
     position: 'relative',
     backgroundColor: colors.surface,
+  },
+  imageTouchable: {
+    width: '100%',
+    height: '100%',
   },
   image: {
     width: '100%',
@@ -214,20 +173,23 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   typePillText: {
-    fontSize: 12,
+    fontFamily: fontFamilies.bodySemiBold,
+    fontSize: 12.5,
     fontWeight: '600',
-    color: '#252823',
+    color: colors.textPrimary,
   },
   favoriteButton: {
     position: 'absolute',
     top: 12,
     right: 12,
-    width: 36,
-    height: 36,
+    width: 38,
+    height: 38,
     borderRadius: borderRadius.round,
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 20,
+    elevation: 6,
   },
   infoContainer: {
     padding: spacing.lg,
@@ -236,22 +198,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   title: {
     ...typography.h3,
-    fontSize: 18,
-    fontFamily: 'serif',
-    color: '#1A1A1A',
+    fontSize: 20,
+    fontFamily: fontFamilies.heading,
+    fontWeight: '600',
+    color: colors.textPrimary,
     flex: 1,
     marginRight: spacing.sm,
   },
   price: {
     ...typography.priceCard,
-    fontSize: 18,
-    fontFamily: 'serif',
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontSize: 20,
+    fontFamily: fontFamilies.heading,
+    fontWeight: '600',
+    color: colors.textPrimary,
   },
   locationRow: {
     flexDirection: 'row',
@@ -259,10 +222,13 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   locationText: {
-    ...typography.bodySmall,
+    fontFamily: fontFamilies.bodyMedium,
     color: colors.textSecondary,
-    marginLeft: 4,
+    fontSize: 14.5,
+    lineHeight: 20,
+    marginLeft: 6,
     flex: 1,
+    fontWeight: '500',
   },
   specsRow: {
     flexDirection: 'row',
@@ -280,10 +246,11 @@ const styles = StyleSheet.create({
     marginRight: spacing.lg,
   },
   specText: {
-    ...typography.bodySmall,
+    fontFamily: fontFamilies.bodyMedium,
     color: colors.textSecondary,
     marginLeft: 6,
-    fontSize: 13,
+    fontSize: 14,
+    fontWeight: '500',
   },
   arrowButton: {
     width: 40,

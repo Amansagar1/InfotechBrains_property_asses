@@ -12,13 +12,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SavedScreenProps } from '../../types/navigation';
-import {
-  INITIAL_SAVED_PROPERTIES,
-  SavedPropertyItem,
-} from '../../constants/savedProperties';
+import { Property } from '../../types/property';
 import { SavedPropertyCard } from '../../components/saved/SavedPropertyCard';
 import { Icons } from '../../components/common/Icons';
 import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
+import { useApp } from '../../context/AppContext';
 
 type SortOption = 'recently_saved' | 'price_low_high' | 'price_high_low' | 'sqft_largest';
 
@@ -37,26 +36,18 @@ const SORT_OPTIONS: SortItem[] = [
 export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
   navigation,
 }) => {
-  const [savedItems] = useState<SavedPropertyItem[]>(INITIAL_SAVED_PROPERTIES);
-  const [savedIds, setSavedIds] = useState<Set<string>>(
-    new Set(INITIAL_SAVED_PROPERTIES.map(p => p.id))
-  );
+  const { savedProperties, toggleSave, isSaved } = useApp();
   const [selectedSort, setSelectedSort] = useState<SortOption>('recently_saved');
   const [showSortModal, setShowSortModal] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const handleToggleSave = (item: SavedPropertyItem) => {
-    setSavedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(item.id)) {
-        next.delete(item.id);
-        showToast(`Removed "${item.title}" from saved`);
-      } else {
-        next.add(item.id);
-        showToast(`Saved "${item.title}"`);
-      }
-      return next;
-    });
+  const handleToggleSave = (item: Property) => {
+    const isNowSaved = toggleSave(item);
+    showToast(
+      isNowSaved
+        ? `Saved "${item.address ? item.address.split(',')[0] : 'Property'}"`
+        : `Removed "${item.address ? item.address.split(',')[0] : 'Property'}" from saved`
+    );
   };
 
   const showToast = (msg: string) => {
@@ -67,9 +58,7 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
   };
 
   const activeProperties = useMemo(() => {
-    const list = savedItems.filter(item => savedIds.has(item.id));
-
-    return [...list].sort((a, b) => {
+    return [...savedProperties].sort((a, b) => {
       if (selectedSort === 'price_low_high') {
         return a.price - b.price;
       }
@@ -77,16 +66,16 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
         return b.price - a.price;
       }
       if (selectedSort === 'sqft_largest') {
-        return b.sqft - a.sqft;
+        return (b.sqft || 0) - (a.sqft || 0);
       }
-      return b.savedTimestamp - a.savedTimestamp;
+      return 0;
     });
-  }, [savedItems, savedIds, selectedSort]);
+  }, [savedProperties, selectedSort]);
 
   const currentSortLabel =
     SORT_OPTIONS.find(o => o.id === selectedSort)?.label || 'Recently saved';
 
-  const handlePropertyPress = (property: SavedPropertyItem) => {
+  const handlePropertyPress = (property: Property) => {
     navigation.navigate('PropertyDetails', {
       propertyId: property.id,
       initialProperty: property,
@@ -95,7 +84,7 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
 
   const renderHeader = () => (
     <View style={styles.header}>
-      {/* Top Row: Title + Bookmark Icon Button */}
+      {/*-------------------- Header Top Row ----------------------*/}
       <View style={styles.topRow}>
         <View style={styles.titleWrapper}>
           <Text style={styles.mainTitle}>Saved Properties</Text>
@@ -109,11 +98,11 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
           style={styles.bookmarkButton}
           onPress={() => showToast('All bookmarks are synced')}
         >
-          <Icons.Bookmark size={20} color="#1A1A1A" />
+          <Icons.Bookmark size={20} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
 
-      {/* Meta Row: Property Count + Sort Dropdown */}
+      {/*-------------------- Property Count & Sort ----------------------*/}
       <View style={styles.metaRow}>
         <Text style={styles.countText}>
           {activeProperties.length === 1
@@ -127,7 +116,7 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
           onPress={() => setShowSortModal(true)}
         >
           <Text style={styles.sortButtonText}>{currentSortLabel}</Text>
-          <Icons.ChevronDown size={14} color="#1A1A1A" />
+          <Icons.ChevronDown size={14} color={colors.textPrimary} />
         </TouchableOpacity>
       </View>
     </View>
@@ -136,7 +125,7 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <View style={styles.emptyIconCircle}>
-        <Icons.Heart size={36} color="#0A3B32" filled={false} />
+        <Icons.Heart size={36} color={colors.primary} filled={false} />
       </View>
       <Text style={styles.emptyTitle}>No Saved Properties</Text>
       <Text style={styles.emptySubtitle}>
@@ -163,21 +152,21 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       <StatusBar barStyle="dark-content" />
 
-      {/* Toast Notification */}
+      {/*-------------------- Toast Notification ----------------------*/}
       {toastMessage && (
         <View style={styles.toast}>
           <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       )}
 
-      {/* Property List */}
+      {/*-------------------- Property List ----------------------*/}
       <FlatList
         data={activeProperties}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <SavedPropertyCard
             property={item}
-            isSaved={savedIds.has(item.id)}
+            isSaved={isSaved(item.id)}
             onPress={() => handlePropertyPress(item)}
             onToggleSave={() => handleToggleSave(item)}
           />
@@ -188,7 +177,7 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
         showsVerticalScrollIndicator={false}
       />
 
-      {/* Sort Options Modal */}
+      {/*-------------------- Sort Options Modal ----------------------*/}
       <Modal
         visible={showSortModal}
         transparent
@@ -240,6 +229,7 @@ export const SavedPropertiesScreen: React.FC<SavedScreenProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -264,18 +254,19 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   mainTitle: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 32,
     lineHeight: 38,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     letterSpacing: -0.3,
   },
   subtitle: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 15,
     lineHeight: 21,
-    color: '#6B7280',
+    color: colors.textSecondary,
+    fontWeight: '500',
     marginTop: 5,
   },
   bookmarkButton: {
@@ -302,10 +293,10 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   countText: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14.5,
-    color: '#525252',
-    fontWeight: '400',
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
   sortButton: {
     flexDirection: 'row',
@@ -324,9 +315,10 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   sortButtonText: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 13.5,
     fontWeight: '500',
-    color: '#1A1A1A',
+    color: colors.textPrimary,
   },
   emptyContainer: {
     paddingVertical: 60,
@@ -344,28 +336,30 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   emptyTitle: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 22,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontFamily: fontFamilies.body,
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 20,
+    fontWeight: '500',
     marginBottom: 24,
   },
   discoverButton: {
-    backgroundColor: '#0F4A3E',
+    backgroundColor: colors.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 24,
   },
   discoverButtonText: {
-    color: '#FFFFFF',
+    color: colors.textLight,
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -411,10 +405,10 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sortModalTitle: {
-    fontFamily: fontFamilies.heading,
+    fontFamily: fontFamilies.headingSemiBold,
     fontSize: 18,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 16,
   },
   sortOptionRow: {
@@ -431,12 +425,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   sortOptionText: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 15,
-    color: '#374151',
-    fontWeight: '400',
+    color: colors.textSecondary,
+    fontWeight: '500',
   },
   sortOptionTextActive: {
-    color: '#0A4D3C',
+    fontFamily: fontFamilies.bodySemiBold,
+    color: colors.primary,
     fontWeight: '600',
   },
 });

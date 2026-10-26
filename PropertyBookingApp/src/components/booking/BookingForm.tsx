@@ -9,6 +9,8 @@ import {
 import { BookingFormData, BookingFormErrors } from '../../types/booking';
 import { FormField } from '../common/FormField';
 import { Icons } from '../common/Icons';
+import { fontFamilies } from '../../theme/typography';
+import { colors } from '../../theme/colors';
 
 export interface BookingFormProps {
   formData: BookingFormData;
@@ -153,7 +155,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         <Text style={styles.trustText}>Your information is safe with us.</Text>
       </View>
 
-      {/* Date Selection Modal */}
+      {/*-------------------- Date Selection Modal ----------------------*/}
       <Modal
         visible={showDateModal}
         transparent
@@ -191,7 +193,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         </TouchableOpacity>
       </Modal>
 
-      {/* Time Slot Selection Modal */}
+      {/*-------------------- Time Slot Selection Modal ----------------------*/}
       <Modal
         visible={showTimeModal}
         transparent
@@ -228,7 +230,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
         </TouchableOpacity>
       </Modal>
 
-      {/* Country Code Modal */}
+      {/*-------------------- Country Code Modal ----------------------*/}
       <Modal
         visible={showCountryModal}
         transparent
@@ -268,6 +270,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
   );
 };
 
+//-------------------- Styles ----------------------
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
@@ -275,15 +278,17 @@ const styles = StyleSheet.create({
     marginTop: 0,
   },
   sectionTitle: {
-    fontFamily: 'serif',
+    fontFamily: fontFamilies.heading,
     fontSize: 24,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 6,
   },
   sectionSubtitle: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontWeight: '500',
     fontSize: 14,
-    color: '#6B7280',
+    color: colors.textSecondary,
     marginBottom: 24,
     lineHeight: 20,
   },
@@ -296,6 +301,8 @@ const styles = StyleSheet.create({
     borderColor: '#F8B4B4',
   },
   errorBannerText: {
+    fontFamily: fontFamilies.bodySemiBold,
+    fontWeight: '600',
     fontSize: 13,
     color: '#9B1C1C',
     textAlign: 'center',
@@ -319,8 +326,9 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   submitButtonText: {
+    fontFamily: fontFamilies.bodySemiBold,
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
     marginRight: 10,
   },
@@ -331,8 +339,10 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   trustText: {
+    fontFamily: fontFamilies.bodyMedium,
+    fontWeight: '500',
     fontSize: 13,
-    color: '#6B7280',
+    color: colors.textSecondary,
     marginLeft: 8,
   },
   modalOverlay: {
@@ -355,10 +365,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
-    fontFamily: 'serif',
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1A1A1A',
+    fontFamily: fontFamilies.heading,
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.textPrimary,
     marginBottom: 16,
   },
   modalItem: {
@@ -374,17 +384,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3EFE6',
   },
   modalItemText: {
-    fontSize: 14.5,
-    color: '#1A1A1A',
+    fontFamily: fontFamilies.bodyMedium,
+    fontSize: 15,
+    color: colors.textPrimary,
     fontWeight: '500',
   },
   modalItemTextActive: {
     color: '#264E36',
-    fontWeight: '700',
+    fontWeight: '600',
   },
   modalItemSubtext: {
+    fontFamily: fontFamilies.bodyMedium,
     fontSize: 13,
-    color: '#8A867E',
+    color: colors.textTertiary,
+    fontWeight: '500',
   },
 });
 

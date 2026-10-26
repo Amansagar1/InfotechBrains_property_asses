@@ -88,7 +88,7 @@ export const BookingForm: React.FC<BookingFormProps> = ({
       <FormField
         label="Email Address"
         required
-        placeholder="you@example.com"
+        placeholder="Aman@example.com"
         value={formData.email}
         onChangeText={text => onUpdateField('email', text)}
         error={errors.email}

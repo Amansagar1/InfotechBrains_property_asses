@@ -207,7 +207,7 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
         </View>
       </ScrollView>
 
-      <SafeAreaView style={styles.bottomBarContainer}>
+      <SafeAreaView edges={['bottom']} style={styles.bottomBarContainer}>
         <View style={styles.bottomBar}>
           <CustomButton
             title="Book a Visit"
@@ -218,7 +218,7 @@ export const PropertyDetailsScreen: React.FC<PropertyDetailsScreenProps> = ({
           />
 
           <TouchableOpacity activeOpacity={0.8} style={styles.chatButton}>
-            <Icons.Chat size={22} color={colors.textPrimary} />
+            <Icons.Chat size={20} color={colors.textPrimary} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingBottom: 110,
+    paddingBottom: 135,
   },
   contentContainer: {
     backgroundColor: '#FAF9F6',
@@ -313,13 +313,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#FAF9F6',
-    paddingBottom: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ECEAE4',
+    paddingTop: 8,
+    paddingBottom: Platform.OS === 'ios' ? 8 : 4,
   },
   bottomBar: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.xs,
   },
   botanicalRight: {
     position: 'absolute',
@@ -332,10 +334,11 @@ const styles = StyleSheet.create({
   bookButton: {
     flex: 1,
     marginRight: spacing.md,
+    height: 48,
   },
   chatButton: {
-    width: 56,
-    height: 56,
+    width: 48,
+    height: 48,
     borderRadius: borderRadius.round,
     backgroundColor: '#EFE8DE',
     justifyContent: 'center',
@@ -350,6 +353,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ECEAE4',
     marginTop: 6,
+    marginBottom: 8,
   },
   agentAvatar: {
     width: 48,

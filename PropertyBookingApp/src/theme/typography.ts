@@ -2,22 +2,22 @@ import { Platform, TextStyle } from 'react-native';
 
 export const fontFamilies = {
   heading: Platform.select({
-    ios: 'Fraunces',
+    ios: 'Fraunces-SemiBold',
     android: 'Fraunces-SemiBold',
     default: 'Fraunces-SemiBold',
   }),
   headingSemiBold: Platform.select({
-    ios: 'Fraunces',
+    ios: 'Fraunces-SemiBold',
     android: 'Fraunces-SemiBold',
     default: 'Fraunces-SemiBold',
   }),
   headingBold: Platform.select({
-    ios: 'Fraunces',
+    ios: 'Fraunces-Bold',
     android: 'Fraunces-Bold',
     default: 'Fraunces-Bold',
   }),
   body: Platform.select({
-    ios: 'Outfit',
+    ios: 'Outfit-Medium',
     android: 'Outfit-Medium',
     default: 'Outfit-Medium',
   }),
